@@ -26,39 +26,61 @@ public static class DynamicDataSeeder
 
         var hasher = new PasswordHasher<CarShopUserEntity>();
 
+        var now = DateTime.UtcNow;
+
         var admin = new CarShopUserEntity
         {
+            Username = "admin",
             Email = "admin@CarShop.local",
             PasswordHash = hasher.HashPassword(null!, "Admin123!"),
-            IsAdmin = true,
-            IsEnabled = true,
+            FirstName = "Admin",
+            LastName = "User",
+            Phone = "+385911234567",
+            RoleId = 1,
+            IsActive = true,
+            CreatedAtUtc = now
         };
 
-        var user = new CarShopUserEntity
+        var manager = new CarShopUserEntity
         {
+            Username = "manager",
             Email = "manager@CarShop.local",
             PasswordHash = hasher.HashPassword(null!, "User123!"),
-            IsManager = true,
-            IsEnabled = true,
+            FirstName = "Market",
+            LastName = "Manager",
+            Phone = "+385981112223",
+            RoleId = 2,
+            IsActive = true,
+            CreatedAtUtc = now
         };
 
-        var dummyForSwagger = new CarShopUserEntity
+        var demoUser = new CarShopUserEntity
         {
-            Email = "string",
-            PasswordHash = hasher.HashPassword(null!, "string"),
-            IsEmployee = true,
-            IsEnabled = true,
+            Username = "demo",
+            Email = "demo@CarShop.local",
+            PasswordHash = hasher.HashPassword(null!, "Demo123!"),
+            FirstName = "Demo",
+            LastName = "User",
+            Phone = "+385991112233",
+            RoleId = 3,
+            IsActive = true,
+            CreatedAtUtc = now
         };
-        var dummyForTests = new CarShopUserEntity
+
+        var testUser = new CarShopUserEntity
         {
-            Email = "test",
-            PasswordHash = hasher.HashPassword(null!, "test123"),
-            IsEmployee = true,
-            IsEnabled = true,
+            Username = "tester",
+            Email = "tester@CarShop.local",
+            PasswordHash = hasher.HashPassword(null!, "Tester123!"),
+            FirstName = "Test",
+            LastName = "Account",
+            Phone = "+385971234567",
+            RoleId = 3,
+            IsActive = true,
+            CreatedAtUtc = now
         };
-        context.Users.AddRange(admin, user, dummyForSwagger, dummyForTests);
+        context.Users.AddRange(admin, manager, demoUser, testUser);
         await context.SaveChangesAsync();
-
         Console.WriteLine("✅ Dynamic seed: demo users added.");
     }
 }

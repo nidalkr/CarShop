@@ -33,7 +33,7 @@ public sealed class RefreshTokenCommandHandler(
         }
 
         var user = rt.User;
-        if (user is null || !user.IsEnabled || user.IsDeleted)
+        if (user is null || !user.IsActive || user.IsDeleted)
             throw new CarShopConflictException("Korisnički nalog je nevažeći.");
 
         // 3) Rotation: revoke the old one

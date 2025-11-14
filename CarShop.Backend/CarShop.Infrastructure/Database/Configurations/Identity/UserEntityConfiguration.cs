@@ -8,31 +8,25 @@ public sealed class UserEntityConfiguration : IEntityTypeConfiguration<CarShopUs
 
         b.HasKey(x => x.Id);
 
-        b.HasIndex(x => x.Email)
-            .IsUnique();
+        b.HasIndex(x => x.Email).IsUnique();
+        b.Property(x => x.Email).IsRequired().HasMaxLength(200);
 
-        b.Property(x => x.Email)
-            .IsRequired()
-            .HasMaxLength(200);
+        b.HasIndex(x=>x.Username).IsUnique();
+        b.Property(x=>x.Username).IsRequired().HasMaxLength(50);
+        
+        b.Property(x => x.PasswordHash).IsRequired();
 
-        b.Property(x => x.PasswordHash)
-            .IsRequired();
+        b.Property(x=>x.FirstName).IsRequired().HasMaxLength(50);
 
-        // Roles
-        b.Property(x => x.IsAdmin)
-            .HasDefaultValue(false);
+        b.Property(x => x.LastName).IsRequired().HasMaxLength(50);
 
-        b.Property(x => x.IsManager)
-            .HasDefaultValue(false);
+        b.Property(x=>x.Phone).HasMaxLength(50);
 
-        b.Property(x => x.IsEmployee)
-            .HasDefaultValue(true); // Default: regular user
+        b.Property(x => x.RoleId).IsRequired();
 
-        b.Property(x => x.TokenVersion)
-            .HasDefaultValue(0);
+        b.Property(x => x.IsActive).HasDefaultValue(true);
 
-        b.Property(x => x.IsEnabled)
-            .HasDefaultValue(true);
+        b.Property(x => x.CreatedAtUtc).HasDefaultValueSql("GETUTCDATE()");
 
         // Navigation
         b.HasMany(x => x.RefreshTokens)

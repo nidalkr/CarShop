@@ -11,9 +11,19 @@ public interface IAppCurrentUser
     int? UserId { get; }
 
     /// <summary>
+    /// Unique username of the user.
+    /// </summary>
+    string? Username { get; }
+
+    /// <summary>
     /// User Email. (optional)
     /// </summary>
     string? Email { get; }
+
+    /// <summary>
+    /// Role identifier to which the user belongs.
+    /// </summary>
+    int? RoleId { get; }
 
     /// <summary>
     /// Indicates whether the user is logged in.
@@ -21,17 +31,7 @@ public interface IAppCurrentUser
     bool IsAuthenticated { get; }
 
     /// <summary>
-    /// Indicates whether the user is an administrator.
+    /// Indicates whether the user account is active.
     /// </summary>
-    bool IsAdmin { get; }
-
-    /// <summary>
-    /// Indicates whether the user is a manager.
-    /// </summary>
-    bool IsManager { get; }
-
-    /// <summary>
-    /// Indicates whether the user is a regular employee.
-    /// </summary>
-    bool IsEmployee { get; }
+    bool IsActive { get; }
 }

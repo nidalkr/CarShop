@@ -33,11 +33,11 @@ public sealed class JwtTokenService : IJwtTokenService
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(ClaimTypes.NameIdentifier,   user.Id.ToString()),
+            new(ClaimTypes.Name,             user.Username),
             new(ClaimTypes.Email,            user.Email),
-            new("is_admin",    user.IsAdmin.ToString().ToLowerInvariant()),
-            new("is_manager",  user.IsManager.ToString().ToLowerInvariant()),
-            new("is_employee", user.IsEmployee.ToString().ToLowerInvariant()),
-            new("ver",         user.TokenVersion.ToString()),
+            new("role_id",                   user.RoleId.ToString()),
+            new("is_active",                 user.IsActive.ToString().ToLowerInvariant()),
+            new("created_at",                user.CreatedAtUtc.ToUniversalTime().ToString("O")),
             new(JwtRegisteredClaimNames.Iat, ToUnixTimeSeconds(nowInstant).ToString(), ClaimValueTypes.Integer64),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
             new(JwtRegisteredClaimNames.Aud, _jwt.Audience)

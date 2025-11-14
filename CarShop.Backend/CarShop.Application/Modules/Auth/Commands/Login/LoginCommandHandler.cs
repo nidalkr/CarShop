@@ -11,7 +11,7 @@ public sealed class LoginCommandHandler(
         var email = request.Email.Trim().ToLowerInvariant();
 
         var user = await ctx.Users
-            .FirstOrDefaultAsync(x => x.Email.ToLower() == email && x.IsEnabled && !x.IsDeleted, ct)
+            .FirstOrDefaultAsync(x => x.Email.ToLower() == email && x.IsActive && !x.IsDeleted, ct)
             ?? throw new CarShopNotFoundException("Korisnik nije pronađen ili je onemogućen.");
 
         var verify = hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);

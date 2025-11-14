@@ -21,14 +21,20 @@ public sealed class AppCurrentUser(IHttpContextAccessor httpContextAccessor)
         _user?.FindFirstValue(ClaimTypes.Email);
 
     public bool IsAuthenticated =>
-        _user?.Identity?.IsAuthenticated ?? false;
+       _user?.Identity?.IsAuthenticated ?? false;
 
-    public bool IsAdmin =>
-        _user?.FindFirstValue("is_admin")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+    public string? Username =>
+    _user?.FindFirstValue(ClaimTypes.Name);
+    public int? RoleId =>
+          int.TryParse(_user?.FindFirstValue("role_id"), out var roleId)
+              ? roleId
+              : null;
 
-    public bool IsManager =>
-        _user?.FindFirstValue("is_manager")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+    public bool IsActive =>
+        _user?.FindFirstValue("is_active")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+    private static bool ParseBooleanClaim(string? value) =>
+        value is not null && value.Equals("true", StringComparison.OrdinalIgnoreCase);
 
-    public bool IsEmployee =>
-        _user?.FindFirstValue("is_employee")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+    private static string? EmptyToNull(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value;
 }
