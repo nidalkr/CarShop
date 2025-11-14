@@ -22,6 +22,8 @@ public sealed class UserEntityConfiguration : IEntityTypeConfiguration<CarShopUs
 
         b.Property(x=>x.Phone).HasMaxLength(50);
 
+        b.Property(x=>x.Address).IsRequired().HasMaxLength(50);
+
         b.Property(x => x.RoleId).IsRequired();
 
         b.Property(x => x.IsActive).HasDefaultValue(true);

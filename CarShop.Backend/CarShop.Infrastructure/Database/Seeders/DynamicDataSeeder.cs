@@ -36,6 +36,7 @@ public static class DynamicDataSeeder
             FirstName = "Admin",
             LastName = "User",
             Phone = "+385911234567",
+            Address = "Admin Street 1",
             RoleId = 1,
             IsActive = true,
             CreatedAtUtc = now
@@ -49,6 +50,7 @@ public static class DynamicDataSeeder
             FirstName = "Market",
             LastName = "Manager",
             Phone = "+385981112223",
+            Address = "Manager Street 1",
             RoleId = 2,
             IsActive = true,
             CreatedAtUtc = now
@@ -62,6 +64,7 @@ public static class DynamicDataSeeder
             FirstName = "Demo",
             LastName = "User",
             Phone = "+385991112233",
+            Address = "Demo Street 1",
             RoleId = 3,
             IsActive = true,
             CreatedAtUtc = now
@@ -75,6 +78,7 @@ public static class DynamicDataSeeder
             FirstName = "Test",
             LastName = "Account",
             Phone = "+385971234567",
+            Address = "Test Street 1",
             RoleId = 3,
             IsActive = true,
             CreatedAtUtc = now
