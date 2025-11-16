@@ -82,6 +82,7 @@ public partial class DatabaseContext
         }
     }
 
+
     public override int SaveChanges()
     {
         ApplyAuditAndSoftDelete();

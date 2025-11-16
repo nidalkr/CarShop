@@ -1,4 +1,5 @@
 ﻿using CarShop.Domain.Common;
+using CarShop.Domain.Entities.Appointments;
 using CarShop.Domain.Entities.Commerce;
 using System;
 using System.Collections.Generic;
@@ -38,4 +39,10 @@ public sealed class CarEntity : BaseEntity
 
     public ICollection<InquiryEntity> Inquiries {  get; private set; }=new List<InquiryEntity>();
     public ICollection<CartEntity> Carts { get; private set; } = new List<CartEntity>();
+    public ICollection<ReviewEntity> Reviews { get; private set; } = new List<ReviewEntity>();
+    public ICollection<FavouriteEntity> Favourites { get; private set; } = new List<FavouriteEntity>();
+    public ICollection<OrderEntity> Orders { get; private set; } = new List<OrderEntity>();
+    public ICollection<TestDriveEntity> TestDrives { get; private set; } = new List<TestDriveEntity>();
+    public ICollection<ServiceAppointmentEntity> ServiceAppointments { get; private set; } = new List<ServiceAppointmentEntity>();
+    public ICollection<ServiceRecordEntity> ServiceRecords { get; private set; } = new List<ServiceRecordEntity>();
 }
