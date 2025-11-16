@@ -1,5 +1,5 @@
 ﻿using CarShop.Domain.Common;
-using CarShop.Domain.Entities.Commerc;
+using CarShop.Domain.Entities.Commerce;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,4 +37,5 @@ public sealed class CarEntity : BaseEntity
     public DateTime DateAdded { get; set; }
 
     public ICollection<InquiryEntity> Inquiries {  get; private set; }=new List<InquiryEntity>();
+    public ICollection<CartEntity> Carts { get; private set; } = new List<CartEntity>();
 }

@@ -1,5 +1,5 @@
 ﻿using CarShop.Domain.Entities.Catalog;
-using CarShop.Domain.Entities.Commerc;
+using CarShop.Domain.Entities.Commerce;
 using CarShop.Domain.Entities.Identity;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using CarShop.Domain.Entities.Commerc;
+﻿using CarShop.Domain.Entities.Commerce;
 
 public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderEntity>
 {

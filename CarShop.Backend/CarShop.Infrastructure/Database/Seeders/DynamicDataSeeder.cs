@@ -1,4 +1,4 @@
-﻿using CarShop.Domain.Entities.Commerc;
+﻿using CarShop.Domain.Entities.Commerce;
 
 namespace CarShop.Infrastructure.Database.Seeders;
 

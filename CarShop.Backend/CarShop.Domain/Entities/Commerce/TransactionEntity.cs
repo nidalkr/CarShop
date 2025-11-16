@@ -1,4 +1,4 @@
-﻿using CarShop.Domain.Entities.Commerc;
+﻿using CarShop.Domain.Entities.Commerce;
 using System;
 using System.Collections.Generic;
 using System.Linq;

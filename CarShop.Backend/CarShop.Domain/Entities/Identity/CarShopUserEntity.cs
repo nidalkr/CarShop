@@ -1,6 +1,6 @@
 ﻿// CarShopUserEntity.cs
 using CarShop.Domain.Common;
-using CarShop.Domain.Entities.Commerc;
+using CarShop.Domain.Entities.Commerce;
 
 namespace CarShop.Domain.Entities.Identity;
 
@@ -12,7 +12,7 @@ public sealed class CarShopUserEntity : BaseEntity
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
     public string? Phone { get; set; }
-    public string Address { get; set; } = default;
+    public string Address { get; set; } = default!;
     public DateTime RegistrationDate { get; set; }
     public DateTime? LastLoginDate { get; set; }
     public int RoleId { get; set; }
@@ -21,4 +21,5 @@ public sealed class CarShopUserEntity : BaseEntity
     public ICollection<RefreshTokenEntity> RefreshTokens { get; private set; } = new List<RefreshTokenEntity>();
     public ICollection<ReviewEntity>Reviews { get; private set; }=new List<ReviewEntity>();
     public ICollection<InquiryEntity> Inquiries { get; private set; }=new List<InquiryEntity>();
+    public ICollection<CartEntity> Carts { get; private set; } = new List<CartEntity>();
 }

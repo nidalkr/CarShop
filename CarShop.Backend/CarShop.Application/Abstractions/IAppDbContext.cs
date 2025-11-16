@@ -1,4 +1,4 @@
-﻿using CarShop.Domain.Entities.Commerc;
+﻿using CarShop.Domain.Entities.Commerce;
 
 namespace CarShop.Application.Abstractions;
 
@@ -16,6 +16,7 @@ public interface IAppDbContext
 
     DbSet<ReviewEntity> Reviews { get; }
     DbSet<InquiryEntity> Inquiries { get; }
+    DbSet<CartEntity> Carts { get; }
 
     DbSet<StatusEntity> Statuses { get; }
     Task<int> SaveChangesAsync(CancellationToken ct);

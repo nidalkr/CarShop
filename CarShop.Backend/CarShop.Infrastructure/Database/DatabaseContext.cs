@@ -1,5 +1,5 @@
 ﻿using CarShop.Application.Abstractions;
-using CarShop.Domain.Entities.Commerc;
+using CarShop.Domain.Entities.Commerce;
 
 namespace CarShop.Infrastructure.Database;
 
@@ -22,6 +22,7 @@ public partial class DatabaseContext : DbContext, IAppDbContext
     public DbSet<OrderEntity> Orders => Set<OrderEntity>();
     public DbSet<TransactionEntity> Transactions => Set<TransactionEntity>();
     public DbSet<FavouriteEntity> Favs => Set<FavouriteEntity>();
+    public DbSet<CartEntity> Carts => Set<CartEntity>();
 
     //Appointments
     public DbSet<ServiceAppointmentEntity> Services => Set<ServiceAppointmentEntity>();

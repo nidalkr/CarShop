@@ -8,7 +8,7 @@ using CarShop.Domain.Entities.Identity;
 using CarShop.Domain.Entities.Catalog;
 
 
-namespace CarShop.Domain.Entities.Commerc;
+namespace CarShop.Domain.Entities.Commerce;
 public sealed class InquiryEntity : BaseEntity
 {
     public int UserId { get; set; }

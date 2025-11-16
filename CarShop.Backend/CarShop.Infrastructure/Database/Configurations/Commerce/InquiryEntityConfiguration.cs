@@ -1,11 +1,11 @@
-﻿using CarShop.Domain.Entities.Commerc;
+﻿using CarShop.Domain.Entities.Commerce;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CarShop.Infrastructure.Database.Configurations.Commerc;
+namespace CarShop.Infrastructure.Database.Configurations.Commerce;
 
 public sealed class InquiryEntityConfiguration : IEntityTypeConfiguration<InquiryEntity>
 {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace CarShop.Domain.Entities.Commerc;
+namespace CarShop.Domain.Entities.Commerce;
 
 public sealed class StatusEntity:BaseEntity
 {
