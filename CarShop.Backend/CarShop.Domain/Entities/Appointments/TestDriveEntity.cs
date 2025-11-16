@@ -1,0 +1,26 @@
+﻿using CarShop.Domain.Entities.Catalog;
+using CarShop.Domain.Entities.Commerc;
+using CarShop.Domain.Entities.Identity;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CarShop.Domain.Entities.Appointments
+{
+    public class TestDriveEntity
+    {
+        public int Id { get; set; }
+        public int CarId { get; set; }
+        public CarEntity Car { get; set; }
+        public int UserId { get; set; }
+        public CarShopUserEntity User { get; set; }
+        //SalesPersonId Missing
+        public DateTime ScheduledDateTime { get; set; }
+        public int StatusId { get; set; }
+        public StatusEntity Status { get; set; }
+        public string? Notes { get; set; }
+
+    }
+}
