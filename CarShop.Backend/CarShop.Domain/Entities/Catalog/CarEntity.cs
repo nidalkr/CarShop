@@ -1,5 +1,7 @@
 ﻿using CarShop.Domain.Common;
+using CarShop.Domain.Entities.Appointments;
 using CarShop.Domain.Entities.Commerc;
+using CarShop.Domain.Entities.Commerce;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,5 +38,11 @@ public sealed class CarEntity : BaseEntity
     public decimal? DiscountedPrice { get; set; }
     public DateTime DateAdded { get; set; }
 
-    public ICollection<InquiryEntity> Inquiries {  get; private set; }=new List<InquiryEntity>();
+    public ICollection<ReviewEntity> Reviews { get; private set; } = new List<ReviewEntity>();
+    public ICollection<InquiryEntity> Inquiries { get; private set; } = new List<InquiryEntity>();
+    public ICollection<FavouriteEntity> Favourites { get; private set; } = new List<FavouriteEntity>();
+    public ICollection<OrderEntity> Orders { get; private set; } = new List<OrderEntity>();
+    public ICollection<TestDriveEntity> TestDrives { get; private set; } = new List<TestDriveEntity>();
+    public ICollection<ServiceAppointmentEntity> ServiceAppointments { get; private set; } = new List<ServiceAppointmentEntity>();
+    public ICollection<ServiceRecordEntity> ServiceRecords { get; private set; } = new List<ServiceRecordEntity>();
 }

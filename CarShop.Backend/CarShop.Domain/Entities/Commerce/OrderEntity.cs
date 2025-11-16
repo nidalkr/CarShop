@@ -1,4 +1,6 @@
-﻿using CarShop.Domain.Entities.Catalog;
+﻿using CarShop.Domain.Entities.Appointments;
+using CarShop.Domain.Entities.Catalog;
+using CarShop.Domain.Entities.Commerce;
 using CarShop.Domain.Entities.Identity;
 using System;
 using System.Collections.Generic;
@@ -21,5 +23,8 @@ namespace CarShop.Domain.Entities.Commerc
         public DateTime OrderDate { get; set; }
         public decimal FinalAmount { get; set; }
         public string ShippingAddress { get; set; }
+        public ICollection<DeliveryEntity> Deliveries { get; private set; } = new List<DeliveryEntity>();
+        public ICollection<TransactionEntity> Transactions { get; private set; } = new List<TransactionEntity>();
+
     }
 }

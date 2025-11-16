@@ -1,4 +1,5 @@
 ﻿using CarShop.Domain.Common;
+using CarShop.Domain.Entities.Commerc;
 using CarShop.Infrastructure.Database.Seeders;
 using System.Linq.Expressions;
 using System.Runtime.Intrinsics.X86;
@@ -55,10 +56,20 @@ public partial class DatabaseContext
 
     private void ApplyGlobalFielters(ModelBuilder modelBuilder)
     {
-        // Apply a global filter to all entities inheriting from BaseEntity
+        var excluded = new[]
+        {
+        typeof(CarEntity),
+        typeof(StatusEntity),
+        typeof(CategoryEntity),
+        typeof(BrandEntity),
+        typeof(CarShopUserEntity),
+        typeof(UserRoleEntity)
+    };
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType)
+                && !excluded.Contains(entityType.ClrType))
             {
                 var parameter = Expression.Parameter(entityType.ClrType, "e");
                 var prop = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
@@ -70,6 +81,7 @@ public partial class DatabaseContext
             }
         }
     }
+
 
     public override int SaveChanges()
     {

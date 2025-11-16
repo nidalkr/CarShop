@@ -1,6 +1,8 @@
 ﻿// CarShopUserEntity.cs
 using CarShop.Domain.Common;
+using CarShop.Domain.Entities.Appointments;
 using CarShop.Domain.Entities.Commerc;
+using CarShop.Domain.Entities.Commerce;
 
 namespace CarShop.Domain.Entities.Identity;
 
@@ -20,5 +22,10 @@ public sealed class CarShopUserEntity : BaseEntity
     public bool IsActive { get; set; }
     public ICollection<RefreshTokenEntity> RefreshTokens { get; private set; } = new List<RefreshTokenEntity>();
     public ICollection<ReviewEntity>Reviews { get; private set; }=new List<ReviewEntity>();
-    public ICollection<InquiryEntity> Inquiries { get; private set; }=new List<InquiryEntity>();
+    public ICollection<InquiryEntity> Inquiries { get; private set; }=new List<InquiryEntity>();   
+    public ICollection<TestDriveEntity> TestDrives { get; private set; } = new List<TestDriveEntity>();
+    public ICollection<ServiceAppointmentEntity> ServiceAppointments { get; private set; } = new List<ServiceAppointmentEntity>();
+    public ICollection<FavouriteEntity> Favourites { get; private set; } = new List<FavouriteEntity>();
+    public ICollection<OrderEntity> Orders { get; private set; } = new List<OrderEntity>();
+
 }

@@ -23,6 +23,8 @@ namespace CarShop.Domain.Entities.Appointments
         public int StatusId { get; set; }
         public StatusEntity Status { get; set; }
 
-        public List<ServiceRecordEntity> ServiceRecords { get; set; } = new();
+        
+        public ICollection<ServiceRecordEntity> ServiceRecords { get; private set; } = new List<ServiceRecordEntity>();
+
     }
 }
