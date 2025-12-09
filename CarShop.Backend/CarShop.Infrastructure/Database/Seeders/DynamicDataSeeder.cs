@@ -1,4 +1,5 @@
 ﻿using CarShop.Domain.Entities.Commerce;
+using CarShop.Domain.Entities.Appointments;
 
 namespace CarShop.Infrastructure.Database.Seeders;
 
@@ -22,6 +23,16 @@ public static class DynamicDataSeeder
         await SeedCarsAsync(context);
         await SeedInquiriesAsync(context);
         await SeedReviewsAsync(context);
+
+        // Additional seeders for new entities
+        await SeedFavouritesAsync(context);
+        await SeedCartsAsync(context);
+        await SeedOrdersAsync(context);
+        await SeedTransactionsAsync(context);
+        await SeedDeliveriesAsync(context);
+        await SeedTestDrivesAsync(context);
+        await SeedServiceAppointmentsAsync(context);
+        await SeedServiceRecordsAsync(context);
     }
 
     private static async Task SeedUserRolesAsync(DatabaseContext context)
@@ -372,7 +383,31 @@ public static class DynamicDataSeeder
                 DiscountedPrice = 65990m,
                 DateAdded = now,
                 CreatedAtUtc = now
+            },
+            new CarEntity 
+            {
+                BrandId = brands["Ford"],
+                CategoryId = categories["Sedan"],   
+                CarStatusId = statuses["Available"],
+                Model = "Focus",
+                Vin = "WF05XXGCC5GL12345",
+                ProductionYear = 2018,
+                Mileage = 87000,
+                Color = "Magnetic Grey",
+                BodyStyle = "Hatchback",
+                Transmission = "Manual",
+                FuelType = "Diesel",
+                Drivetrain = "FWD",
+                Engine = "1.5 TDCi",
+                HorsePower = "120 hp",
+                PrimaryImageURL = "https://images.carshop.local/cars/focus.png",
+                Description = "Praktičan i štedljiv gradski automobil, idealan za svakodnevnu vožnju.",
+                Price = 12500m,
+                DateAdded = now,
+                CreatedAtUtc = now
             }
+
+
         };
 
         await context.Cars.AddRangeAsync(cars);
@@ -465,5 +500,313 @@ public static class DynamicDataSeeder
         await context.Reviews.AddRangeAsync(reviews);
         await context.SaveChangesAsync();
         Console.WriteLine("✅ Dynamic seed: reviews added.");
+    }
+
+    /// <summary>
+    /// Seed demo favourites (user-car relationships).
+    /// </summary>
+    private static async Task SeedFavouritesAsync(DatabaseContext context)
+    {
+        if (await context.Favs.AnyAsync())
+            return;
+
+        var users = await context.Users.AsNoTracking().ToDictionaryAsync(x => x.Username, x => x.Id);
+        var cars = await context.Cars.AsNoTracking().ToDictionaryAsync(x => x.Model, x => x.Id);
+        if (users.Count == 0 || cars.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var favourites = new[]
+        {
+            new FavouriteEntity
+            {
+                UserId = users.ContainsKey("demo") ? users["demo"] : users.Values.First(),
+                CarId = cars.ContainsKey("330d xDrive") ? cars["330d xDrive"] : cars.Values.First(),
+                DateAdded = now,
+                Notes = "Razmatram kupnju u skoroj budućnosti."
+            },
+            new FavouriteEntity
+            {
+                UserId = users.ContainsKey("tester") ? users["tester"] : users.Values.Last(),
+                CarId = cars.ContainsKey("Mach E") ? cars["Mach E"] : cars.Values.Last(),
+                DateAdded = now,
+                Notes = "Sviđa mi se opcija električnog pogona."
+            }
+        };
+
+        await context.Favs.AddRangeAsync(favourites);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: favourites added.");
+    }
+
+    /// <summary>
+    /// Seed demo carts with subtotal and taxes.
+    /// </summary>
+    private static async Task SeedCartsAsync(DatabaseContext context)
+    {
+        if (await context.Carts.AnyAsync())
+            return;
+
+        var users = await context.Users.AsNoTracking().ToDictionaryAsync(x => x.Username, x => x.Id);
+        var cars = await context.Cars.AsNoTracking().ToDictionaryAsync(x => x.Model, x => x.Id);
+        if (users.Count == 0 || cars.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var carts = new[]
+        {
+            new CartEntity
+            {
+                UserId = users.ContainsKey("demo") ? users["demo"] : users.Values.First(),
+                CarId = cars.ContainsKey("330d xDrive") ? cars["330d xDrive"] : cars.Values.First(),
+                Subtotal = 45990m,
+                Tax = 0m,
+                CreatedAtUtc = now
+            },
+            new CartEntity
+            {
+                UserId = users.ContainsKey("tester") ? users["tester"] : users.Values.Last(),
+                CarId = cars.ContainsKey("Mach E") ? cars["Mach E"] : cars.Values.Last(),
+                Subtotal = 89990m,
+                Tax = 0m,
+                CreatedAtUtc = now
+            }
+        };
+
+        foreach (var cart in carts)
+        {
+            cart.RecalculateTotal();
+        }
+
+        await context.Carts.AddRangeAsync(carts);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: carts added.");
+    }
+
+    /// <summary>
+    /// Seed demo orders referencing users, cars and statuses.
+    /// </summary>
+    private static async Task SeedOrdersAsync(DatabaseContext context)
+    {
+        if (await context.Orders.AnyAsync())
+            return;
+
+        var users = await context.Users.AsNoTracking().ToDictionaryAsync(x => x.Username, x => x.Id);
+        var cars = await context.Cars.AsNoTracking().ToDictionaryAsync(x => x.Model, x => x.Id);
+        var statuses = await context.Statuses.AsNoTracking().ToDictionaryAsync(x => x.StatusName, x => x.Id);
+        if (users.Count == 0 || cars.Count == 0 || statuses.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var orders = new[]
+        {
+            new OrderEntity
+            {
+                UserId = users.ContainsKey("demo") ? users["demo"] : users.Values.First(),
+                CarId = cars.ContainsKey("C 320 4 Matic") ? cars["C 320 4 Matic"] : cars.Values.First(),
+                OrderStatusId = statuses.ContainsKey("Confirmed") ? statuses["Confirmed"] : statuses.Values.First(),
+                OrderDate = now.AddDays(-7),
+                FinalAmount = 31500m,
+                ShippingAddress = "Demo Street 1"
+            },
+            new OrderEntity
+            {
+                UserId = users.ContainsKey("tester") ? users["tester"] : users.Values.Last(),
+                CarId = cars.ContainsKey("Mach E") ? cars["Mach E"] : cars.Values.Last(),
+                OrderStatusId = statuses.ContainsKey("Pending") ? statuses["Pending"] : statuses.Values.Last(),
+                OrderDate = now.AddDays(-3),
+                FinalAmount = 89990m,
+                ShippingAddress = "Test Street 1"
+            }
+        };
+
+        await context.Orders.AddRangeAsync(orders);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: orders added.");
+    }
+
+    /// <summary>
+    /// Seed demo transactions for each order.
+    /// </summary>
+    private static async Task SeedTransactionsAsync(DatabaseContext context)
+    {
+        if (await context.Transactions.AnyAsync())
+            return;
+
+        var orders = await context.Orders.AsNoTracking().ToListAsync();
+        var statuses = await context.Statuses.AsNoTracking().ToDictionaryAsync(x => x.StatusName, x => x.Id);
+        if (orders.Count == 0 || statuses.Count == 0)
+            return;
+
+        var transactions = new List<TransactionEntity>();
+
+        foreach (var order in orders)
+        {
+            transactions.Add(new TransactionEntity
+            {
+                OrderId = order.Id,
+                TransactionDate = order.OrderDate.AddDays(1),
+                Amount = order.FinalAmount,
+                PaymentMethod = "Kartica",
+                StatusId = statuses.ContainsKey("Completed") ? statuses["Completed"] : statuses.Values.First(),
+                FinancingProvider = null,
+                InterestRate = null,
+                LoanTermMonths = null
+            });
+        }
+
+        await context.Transactions.AddRangeAsync(transactions);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: transactions added.");
+    }
+
+    /// <summary>
+    /// Seed demo deliveries for each order.
+    /// </summary>
+    private static async Task SeedDeliveriesAsync(DatabaseContext context)
+    {
+        if (await context.Deliveries.AnyAsync())
+            return;
+
+        var orders = await context.Orders.AsNoTracking().ToListAsync();
+        var statuses = await context.Statuses.AsNoTracking().ToDictionaryAsync(x => x.StatusName, x => x.Id);
+        if (orders.Count == 0 || statuses.Count == 0)
+            return;
+
+        var deliveries = new List<DeliveryEntity>();
+        var trackingNumber = 100000;
+
+        foreach (var order in orders)
+        {
+            deliveries.Add(new DeliveryEntity
+            {
+                OrderId = order.Id,
+                StatusId = statuses.ContainsKey("Shipped") ? statuses["Shipped"] : statuses.Values.First(),
+                ScheduledDate = order.OrderDate.AddDays(2),
+                DeliveredDate = order.OrderDate.AddDays(5),
+                Address = order.ShippingAddress,
+                TrackingNumber = trackingNumber++
+            });
+        }
+
+        await context.Deliveries.AddRangeAsync(deliveries);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: deliveries added.");
+    }
+
+    /// <summary>
+    /// Seed demo test drive appointments.
+    /// </summary>
+    private static async Task SeedTestDrivesAsync(DatabaseContext context)
+    {
+        if (await context.Tests.AnyAsync())
+            return;
+
+        var users = await context.Users.AsNoTracking().ToDictionaryAsync(x => x.Username, x => x.Id);
+        var cars = await context.Cars.AsNoTracking().ToDictionaryAsync(x => x.Model, x => x.Id);
+        var statuses = await context.Statuses.AsNoTracking().ToDictionaryAsync(x => x.StatusName, x => x.Id);
+        if (users.Count == 0 || cars.Count == 0 || statuses.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var testDrives = new[]
+        {
+            new TestDriveEntity
+            {
+                UserId = users.ContainsKey("demo") ? users["demo"] : users.Values.First(),
+                CarId = cars.ContainsKey("C 320 4 Matic") ? cars["C 320 4 Matic"] : cars.Values.First(),
+                ScheduledDateTime = now.AddDays(1).AddHours(10),
+                StatusId = statuses.ContainsKey("Confirmed") ? statuses["Confirmed"] : statuses.Values.First(),
+                Notes = "Želim testirati performanse na autocesti."
+            },
+            new TestDriveEntity
+            {
+                UserId = users.ContainsKey("tester") ? users["tester"] : users.Values.Last(),
+                CarId = cars.ContainsKey("Mach E") ? cars["Mach E"] : cars.Values.Last(),
+                ScheduledDateTime = now.AddDays(2).AddHours(12),
+                StatusId = statuses.ContainsKey("Requested") ? statuses["Requested"] : statuses.Values.First(),
+                Notes = "Zanima me domet na bateriji."
+            }
+        };
+
+        await context.Tests.AddRangeAsync(testDrives);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: test drives added.");
+    }
+
+    /// <summary>
+    /// Seed demo service appointments.
+    /// </summary>
+    private static async Task SeedServiceAppointmentsAsync(DatabaseContext context)
+    {
+        if (await context.Services.AnyAsync())
+            return;
+
+        var users = await context.Users.AsNoTracking().ToDictionaryAsync(x => x.Username, x => x.Id);
+        var cars = await context.Cars.AsNoTracking().ToDictionaryAsync(x => x.Model, x => x.Id);
+        var statuses = await context.Statuses.AsNoTracking().ToDictionaryAsync(x => x.StatusName, x => x.Id);
+        if (users.Count == 0 || cars.Count == 0 || statuses.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var appointments = new[]
+        {
+            new ServiceAppointmentEntity
+            {
+                UserId = users.ContainsKey("demo") ? users["demo"] : users.Values.First(),
+                CarId = cars.ContainsKey("C 320 4 Matic") ? cars["C 320 4 Matic"] : cars.Values.First(),
+                ServiceType = "Mali servis",
+                CustomerNotes = "Provjeriti kočnice i ulje.",
+                ScheduledDateTime = now.AddDays(3).AddHours(9),
+                StatusId = statuses.ContainsKey("Pending") ? statuses["Pending"] : statuses.Values.First()
+            },
+            new ServiceAppointmentEntity
+            {
+                UserId = users.ContainsKey("tester") ? users["tester"] : users.Values.Last(),
+                CarId = cars.ContainsKey("Mach E") ? cars["Mach E"] : cars.Values.Last(),
+                ServiceType = "Zamjena guma",
+                CustomerNotes = null,
+                ScheduledDateTime = now.AddDays(4).AddHours(11),
+                StatusId = statuses.ContainsKey("Confirmed") ? statuses["Confirmed"] : statuses.Values.First()
+            }
+        };
+
+        await context.Services.AddRangeAsync(appointments);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: service appointments added.");
+    }
+
+    /// <summary>
+    /// Seed demo service records for each appointment.
+    /// </summary>
+    private static async Task SeedServiceRecordsAsync(DatabaseContext context)
+    {
+        if (await context.serviceRecords.AnyAsync())
+            return;
+
+        var appointments = await context.Services.AsNoTracking().ToListAsync();
+        if (appointments.Count == 0)
+            return;
+
+        var records = new List<ServiceRecordEntity>();
+
+        foreach (var appointment in appointments)
+        {
+            records.Add(new ServiceRecordEntity
+            {
+                AppointmentId = appointment.Id,
+                ServiceDate = appointment.ScheduledDateTime,
+                MileageAtService = 15000,
+                WorkDescription = "Redovni servis: zamjena ulja, filtera i pregled kočnica.",
+                PartsUsed = "Motorno ulje, filter ulja",
+                LaborCost = 80,
+                PartsCost = 30,
+                TotalCost = 110
+            });
+        }
+
+        await context.serviceRecords.AddRangeAsync(records);
+        await context.SaveChangesAsync();
+        Console.WriteLine("✅ Dynamic seed: service records added.");
     }
 }

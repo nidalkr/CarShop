@@ -31,6 +31,8 @@ public sealed class LoginCommandHandler(
 
         await ctx.SaveChangesAsync(ct);
 
+        var role = await ctx.UserRoles.FindAsync(user.RoleId);
+
         return new AuthResultDto
         {
             AccessToken = tokens.AccessToken,
@@ -41,7 +43,10 @@ public sealed class LoginCommandHandler(
             Username = user.Username,
             Email = user.Email,
             FirstName = user.FirstName,
-            LastName = user.LastName
+            LastName = user.LastName,
+
+            RoleId = user.RoleId,
+            RoleName = role?.RoleName ?? string.Empty
         };
     }
 }

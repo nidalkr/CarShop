@@ -25,6 +25,22 @@ public partial class Program
             //
             var builder = WebApplication.CreateBuilder(args);
 
+            // CORS policy name
+            const string CorsPolicyName = "AllowAngularSpa";
+
+            // CORS configuration – allows Angular dev server acces to API
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(CorsPolicyName, policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:4200") // Angular dev
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             // 2) Promote Serilog to full configuration from builder.Configuration
             //    (reads "Serilog" section from appsettings + ENV overrides)
             //
@@ -65,6 +81,10 @@ public partial class Program
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
             app.UseHttpsRedirection();
+
+            // IMPORTANT: CORS goes before auth/authorization and before MapControllers
+            app.UseCors(CorsPolicyName);
+
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -78,8 +98,8 @@ public partial class Program
         }
         catch (HostAbortedException)
         {
-            // EF Core tools abortiraju host nakon što uzmu DbContext.
-            // Ovo nije runtime greška – samo tiho izađi.
+            // EF Core tools abort host after they take DbContext.
+            // This is not runtime error – just queitly exit.
             Log.Information("Host aborted by EF Core tooling (design-time) - its ok.");
         }
         catch (Exception ex)
