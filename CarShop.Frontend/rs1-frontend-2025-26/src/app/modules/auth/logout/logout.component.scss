@@ -1,271 +1,275 @@
-.logout-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+:host {
+  display: block;
+}
+
+/* pozadina kao kod login-page */
+.logout-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-
-  // Dekorativni elementi u pozadini
-  &::before {
-    content: '';
-    position: absolute;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(66, 165, 245, 0.1) 0%, transparent 70%);
-    top: -250px;
-    right: -250px;
-    border-radius: 50%;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(100, 181, 246, 0.15) 0%, transparent 70%);
-    bottom: -200px;
-    left: -200px;
-    border-radius: 50%;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.16), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(91, 157, 255, 0.16), transparent 48%),
+    linear-gradient(135deg, #0f3b95 0%, #2c7be9 60%, #3d93ff 100%);
+  color: #16233f;
 }
 
+/* glavna kartica – ista logika kao login-card */
 .logout-card {
-  max-width: 480px;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(66, 165, 245, 0.2), 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(144, 202, 249, 0.3);
-  overflow: hidden;
   position: relative;
-  z-index: 1;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(66, 165, 245, 0.25), 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  mat-card-header {
-    background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
-    margin: 0;
-    padding: 32px 24px;
-    border-radius: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    position: relative;
-    overflow: hidden;
-
-    // Dekorativni pattern
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-      pointer-events: none;
-    }
-
-    .header-icon {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      width: 56px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-
-      mat-icon {
-        color: white;
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
-      }
-    }
-
-    mat-card-title {
-      color: white;
-      font-size: 26px;
-      font-weight: 600;
-      margin: 0;
-      text-align: center;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      letter-spacing: 0.5px;
-    }
-  }
-
-  mat-card-content {
-    padding: 40px 32px 32px;
-
-    .logout-icon-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-
-      .logout-icon {
-        font-size: 64px;
-        width: 64px;
-        height: 64px;
-        color: #66bb6a;
-        animation: scaleIn 0.5s ease-out;
-      }
-    }
-
-    .logout-message {
-      color: #546e7a;
-      font-size: 16px;
-      text-align: center;
-      margin-bottom: 32px;
-      line-height: 1.6;
-      font-weight: 400;
-    }
-  }
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 26px 70px rgba(8, 36, 94, 0.35);
+  animation: cardEnter 0.28s ease-out;
 }
 
-.logout-progress {
+/* header kao kod login.card-header, samo malo jednostavniji */
+.logout-header {
+  position: relative;
+  background: linear-gradient(135deg, #0066ff 0%, #5a30ff 100%);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  padding: 42px 32px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
+  gap: 10px;
+  align-items: flex-start;
+  overflow: hidden;
 
-  mat-progress-bar {
-    height: 8px;
-    border-radius: 4px;
-
-    ::ng-deep .mat-progress-bar-fill::after {
-      background-color: #42a5f5;
-    }
-
-    ::ng-deep .mat-progress-bar-buffer {
-      background-color: #e3f2fd;
-    }
-
-    ::ng-deep .mat-progress-bar-background {
-      fill: #e3f2fd;
-    }
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
   }
 
-  .logout-countdown {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: #1976d2;
-    font-size: 15px;
-    font-weight: 500;
+  // veći, jači krug
+  &::before {
+    width: 240px;
+    height: 260px;
+    top: -120px;
+    right: -40px;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.25);
+    animation: bubbleMove1 14s ease-in-out infinite alternate;
+  }
 
-    .countdown-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: #42a5f5;
-    }
+  // manji krug
+  &::after {
+    width: 180px;
+    height: 160px;
+    bottom: -100px;
+    right: 300px;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.25);
+    animation: bubbleMove2 18s ease-in-out infinite alternate;
+  }
 
-    span {
-      letter-spacing: 0.3px;
-    }
+  .text {
+    position: relative;
+    z-index: 1;
   }
 }
 
-// Animacije
-@keyframes scaleIn {
+.logout-header-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 400;
+  }
+}
+
+.logout-icon-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+
+  mat-icon {
+    color: #ffffff;
+    font-size: 20px;
+  }
+}
+
+.logout-subtitle {
+  position: relative;
+  z-index: 1;
+  margin: 10px 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* body */
+.logout-body {
+  padding: 30px 32px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;          // promijeni po želji
+  height: 72px;
+  border-radius: 50%;
+  background-color: #e8f7ec;
+  margin: 0 auto 8px;
+}
+
+/* ovdje rješavamo “preveliku” kvačicu */
+.status-icon mat-icon {
+  font-size: 28px;      // manja ikonica da stane u krug
+  width: 28px;
+  height: 28px;
+  line-height: 1;       // da ne iskače vertikalno
+}
+
+.status-icon.success mat-icon {
+  color: #21a35b;
+}
+
+.logout-message {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #18213c;
+}
+
+.logout-description {
+  margin: 0;
+  font-size: 14px;
+  color: #6a789b;
+}
+
+/* progress kartica */
+.logout-progress-card {
+  margin-top: 4px;
+  border-radius: 16px;
+  padding: 14px 18px 16px;
+  background: #f8faff;
+  border: 1px solid #e3ebff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Bootstrap progress, ali scoped samo na logout */
+.logout-progress-card .progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #dde5f5;
+  overflow: hidden;
+}
+
+.logout-progress-card .progress-track .logout-progress-bar {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0066ff 0%, #5a30ff 100%);
+  transform-origin: left center;
+  animation: progressFill 2s ease-out forwards;
+}
+
+.progress-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #41527a;
+
+  strong {
+    color: #0066ff;
+  }
+}
+
+.progress-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #e4edff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 16px;
+    color: #2b7be9;
+  }
+}
+
+/* dugme (ako ga koristiš) */
+.back-to-login-btn {
+  margin-top: 4px;
+  align-self: center;
+  padding-inline: 22px;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+/* ANIMACIJE */
+@keyframes cardEnter {
   from {
-    transform: scale(0);
     opacity: 0;
+    transform: translateY(18px) scale(0.96);
   }
   to {
-    transform: scale(1);
     opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-// Responzivnost
-@media (max-width: 600px) {
-  .logout-wrapper {
-    padding: 16px;
+@keyframes progressFill {
+  from {
+    transform: scaleX(0);
   }
-
-  .logout-card {
-    mat-card-header {
-      padding: 24px 16px;
-
-      .header-icon {
-        width: 48px;
-        height: 48px;
-
-        mat-icon {
-          font-size: 24px;
-          width: 24px;
-          height: 24px;
-        }
-      }
-
-      mat-card-title {
-        font-size: 22px;
-      }
-    }
-
-    mat-card-content {
-      padding: 32px 20px 24px;
-
-      .logout-icon-container {
-        .logout-icon {
-          font-size: 56px;
-          width: 56px;
-          height: 56px;
-        }
-      }
-
-      .logout-message {
-        font-size: 15px;
-        margin-bottom: 24px;
-      }
-    }
-  }
-
-  .logout-progress {
-    padding: 16px;
+  to {
+    transform: scaleX(1);
   }
 }
 
-@media (max-width: 400px) {
-  .logout-card {
-    mat-card-header {
-      mat-card-title {
-        font-size: 20px;
-      }
-    }
+@keyframes bubbleMove1 {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-20px, 15px) scale(1.05); }
+  100% { transform: translate(-40px, -10px) scale(1.1); }
+}
 
-    mat-card-content {
-      .logout-message {
-        font-size: 14px;
-      }
-    }
+@keyframes bubbleMove2 {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(25px, -10px) scale(0.95); }
+  100% { transform: translate(40px, 15px) scale(1.02); }
+}
+
+/* responsive */
+@media (max-width: 540px) {
+  .logout-card {
+    max-width: 100%;
   }
 
-  .logout-progress {
-    .logout-countdown {
-      font-size: 14px;
-
-      .countdown-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-      }
-    }
+  .logout-body {
+    padding-inline: 22px;
   }
 }

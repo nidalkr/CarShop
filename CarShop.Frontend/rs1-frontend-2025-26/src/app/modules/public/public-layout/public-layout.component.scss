@@ -453,3 +453,61 @@ $white: #ffffff;
     height: 24px;
   }
 }
+.public-layout {
+  min-height: 100vh;
+  transition: filter 0.2s ease;
+}
+
+/* kad je login otvoren, zamagli sve ispod */
+.public-layout.blurred {
+  filter: blur(4px);
+}
+/* ANIMACIJE */
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalZoomIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  animation: backdropFadeIn 0.25s ease-out;
+}
+
+.login-modal {
+  position: relative;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  width: 500px;
+  max-width: none;
+  transform-origin: center;
+  animation: modalZoomIn 0.25s ease-out;
+}
+
+
+/* da ipak ne pukne na baš malim ekranima – fallback */
+@media (max-height: 700px) {
+  .login-modal {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;    /* samo tada dozvoli unutrašnji scroll */
+  }
+}

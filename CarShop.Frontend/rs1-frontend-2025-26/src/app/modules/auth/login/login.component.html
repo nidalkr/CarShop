@@ -1,131 +1,124 @@
-<!-- src/app/pages/auth/login/login.component.html -->
-<div class="auth-container">
-  <div class="auth-background">
-    <!-- Decorative elements -->
-    <div class="bg-shape shape-1"></div>
-    <div class="bg-shape shape-2"></div>
-    <div class="bg-shape shape-3"></div>
-  </div>
-
-  <div class="auth-content">
-    <!-- Logo & Brand -->
-    <div class="auth-brand">
-      <mat-icon class="brand-icon">storefront</mat-icon>
-      <h1 class="brand-name">FIT Market</h1>
-      <p class="brand-tagline">Dobrodošli nazad</p>
+<div class="login-page" [ngClass]="{ 'login-page-compact': compact }">
+  <div class="login-card">
+    <!-- HEADER -->
+    <div class="login-header">
+      <div class="lock-icon" aria-hidden="true">
+        <mat-icon>lock_outline</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2>Welcome back</h2>
+        <p class="subtext">Sign in to continue your journey</p>
+      </div>
     </div>
 
-    <!-- Login Card -->
-    <mat-card class="auth-card mat-elevation-z8">
-      <mat-card-header>
-        <mat-card-title>{{ 'AUTH.LOGIN.TITLE' | translate }}</mat-card-title>
-        <mat-card-subtitle>Unesite vaše podatke za pristup</mat-card-subtitle>
-      </mat-card-header>
+    <!-- ERROR BANNER -->
+    <div *ngIf="errorMessage" class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
 
-      <mat-card-content>
-        <!-- Error message -->
-        <div *ngIf="errorMessage" class="error-message" @fadeIn>
-          <mat-icon>error_outline</mat-icon>
-          <span>{{ errorMessage }}</span>
+    <!-- BODY -->
+    <form
+      class="login-body"
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <!-- EMAIL -->
+      <div class="form-field mb-3">
+        <div class="label-row">
+          <label for="email">Email address</label>
         </div>
+        <div class="input-wrapper" [class.invalid]="showEmailError">
+          <mat-icon>mail_outline</mat-icon>
+          <input
+            id="email"
+            type="email"
+            class="form-control auth-input"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            aria-describedby="emailHelp"
+          />
+        </div>
+        <small
+          id="emailHelp"
+          class="helper-text"
+          *ngIf="showEmailError"
+        >
+          {{ emailErrorMessage }}
+        </small>
+      </div>
 
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <!-- Email -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{ 'AUTH.LOGIN.EMAIL_LABEL' | translate }}</mat-label>
-            <input
-              matInput
-              formControlName="email"
-              type="email"
-              placeholder="vasa.email@primjer.com"
-              autocomplete="email"
-            />
-            <mat-icon matPrefix>person</mat-icon>
-            <mat-error *ngIf="form.get('email')?.hasError('required')">
-              Email je obavezan
-            </mat-error>
-            <mat-error *ngIf="form.get('email')?.hasError('email')">
-              Unesite validan email
-            </mat-error>
-          </mat-form-field>
+      <!-- PASSWORD -->
+      <div class="form-field mb-3">
+        <div class="label-row">
+          <label for="password">Password</label>
+          <a class="link" routerLink="/auth/forgot-password">
+            Forgot password?
+          </a>
+        </div>
+        <div class="input-wrapper" [class.invalid]="showPasswordError">
+          <mat-icon>lock_outline</mat-icon>
+          <input
+            id="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            class="form-control auth-input"
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            aria-describedby="passwordHelp"
+          />
+          <button
+            type="button"
+            class="toggle-visibility"
+            (click)="hidePassword = !hidePassword"
+            [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+          >
+            <mat-icon>
+              {{ hidePassword ? 'visibility' : 'visibility_off' }}
+            </mat-icon>
+          </button>
+        </div>
+        <small
+          id="passwordHelp"
+          class="helper-text"
+          *ngIf="showPasswordError"
+        >
+          {{ passwordErrorMessage }}
+        </small>
+      </div>
 
-          <!-- Password -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{ 'AUTH.LOGIN.PASSWORD_LABEL' | translate }}</mat-label>
-            <input
-              matInput
-              formControlName="password"
-              [type]="hidePassword ? 'password' : 'text'"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            />
-            <mat-icon matPrefix>lock</mat-icon>
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              (click)="hidePassword = !hidePassword"
-              [attr.aria-label]="'Hide password'"
-            >
-              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-            </button>
-            <mat-error *ngIf="form.get('password')?.hasError('required')">
-              Lozinka je obavezna
-            </mat-error>
-          </mat-form-field>
+      <!-- SUBMIT -->
+      <button
+  class="primary-button"
+  type="submit"
+  [disabled]="form.invalid || isLoading"
+>
+  <ng-container *ngIf="!isLoading; else loading">
+    <span class="btn-label">Sign in</span>
+    <mat-icon class="btn-icon">arrow_forward</mat-icon>
+  </ng-container>
 
-          <!-- Remember Me & Forgot Password -->
-          <div class="form-row">
-            <mat-checkbox formControlName="rememberMe" color="primary">
-              {{ 'AUTH.LOGIN.REMEMBER_ME' | translate }}
-            </mat-checkbox>
-            <a href="#" class="forgot-link">Zaboravili ste lozinku?</a>
-          </div>
+  <ng-template #loading>
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="18"
+      strokeWidth="3"
+    ></mat-progress-spinner>
+    <span class="btn-label ms-2">Signing in...</span>
+  </ng-template>
+</button>
 
-          <!-- Submit Button -->
-          <div class="actions">
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="submit-button"
-              [disabled]="form.invalid || isLoading"
-            >
-              <ng-container *ngIf="!isLoading; else loadingTpl">
-                <mat-icon>login</mat-icon>
-                {{ 'AUTH.LOGIN.BUTTON' | translate }}
-              </ng-container>
-              <ng-template #loadingTpl>
-                <mat-progress-spinner
-                  mode="indeterminate"
-                  diameter="20"
-                  strokeWidth="3"
-                ></mat-progress-spinner>
-                <span>Prijava u toku...</span>
-              </ng-template>
-            </button>
-          </div>
 
-          <!-- Divider -->
-          <div class="divider">
-            <span>ili</span>
-          </div>
+      <!-- SEPARATOR -->
+      <div class="line-sep my-3"></div>
 
-          <!-- Register Link -->
-          <div class="register-prompt">
-            <span>Nemate nalog?</span>
-            <a routerLink="/auth/register" class="register-link">Registrujte se</a>
-          </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Footer -->
-    <div class="auth-footer">
-      <a routerLink="/" class="back-link">
-        <mat-icon>arrow_back</mat-icon>
-        Nazad na početnu
-      </a>
-    </div>
+      <!-- REGISTER ROW -->
+      <div class="register-row">
+        <span>Don't have an account?</span>
+        <a class="link" routerLink="/auth/register">Create one</a>
+      </div>
+    </form>
   </div>
 </div>
