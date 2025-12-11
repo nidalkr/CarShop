@@ -52,7 +52,7 @@ export class AdminDashboardComponent {
 
   onLogout() {                            
     localStorage.clear();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/public']);
   }
 
 
