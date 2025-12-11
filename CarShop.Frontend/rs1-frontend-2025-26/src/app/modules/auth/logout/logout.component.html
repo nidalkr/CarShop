@@ -1,26 +1,53 @@
-<div class="logout-wrapper" @fadeInUp>
-  <mat-card class="logout-card">
-    <mat-card-header>
-      <div class="header-icon">
-        <mat-icon>logout</mat-icon>
-      </div>
-      <mat-card-title>{{ 'AUTH.LOGOUT.TITLE' | translate }}</mat-card-title>
-    </mat-card-header>
+<!-- logout.component.html -->
+<div class="logout-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+        <div class="logout-card card border-0">
+          <!-- HEADER – isti fazon kao login -->
+          <div class="logout-header">
+            <div class="logout-header-top">
+              <div class="logout-icon-circle">
+                <mat-icon>logout</mat-icon>
+              </div>
+              <h2>Odjava</h2>
+            </div>
+            <p class="logout-subtitle">
+              Sigurno ste odjavljeni sa sistema
+            </p>
+          </div>
 
-    <mat-card-content>
-      <div class="logout-icon-container">
-        <mat-icon class="logout-icon">check_circle</mat-icon>
-      </div>
+          <!-- BODY -->
+          <div class="logout-body">
+            <!-- veliki check -->
+            <div class="status-icon success">
+              <mat-icon>check</mat-icon>
+            </div>
 
-      <p class="logout-message">{{ 'AUTH.LOGOUT.MESSAGE' | translate }}</p>
 
-      <div class="logout-progress">
-        <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
-        <div class="logout-countdown">
-          <mat-icon class="countdown-icon">schedule</mat-icon>
-          <span>{{ 'AUTH.LOGOUT.REDIRECT_IN' | translate : { seconds: countdownSeconds } }}</span>
+            <h3 class="logout-message">Odjavljivanje uspješno</h3>
+            <p class="logout-description">
+              Možete ponovo pristupiti sistemu u bilo kojem trenutku prijavom na svoj nalog.
+            </p>
+
+            <!-- PROGRESS TRACK (Bootstrap progress + tvoj stil) -->
+            <div class="logout-progress-card">
+              <div class="progress progress-track">
+                <div class="progress-bar logout-progress-bar"></div>
+              </div>
+
+              <div class="progress-footer">
+                <div class="progress-icon">
+                  <mat-icon>schedule</mat-icon>
+                </div>
+                <span class="progress-text">
+                  Preusmjeravanje za <strong>2s</strong>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
 </div>
