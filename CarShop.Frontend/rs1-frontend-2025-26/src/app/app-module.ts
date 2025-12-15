@@ -1,4 +1,5 @@
 import { NgModule, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideAnimations} from '@angular/platform-browser/animations';
 import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/http';
@@ -12,6 +13,7 @@ import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {CustomTranslateLoader} from './core/services/custom-translate-loader';
 import {materialModules} from './modules/shared/material-modules';
 import {SharedModule} from './modules/shared/shared-module';
+
 
 
 @NgModule({

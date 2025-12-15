@@ -1,0 +1,202 @@
+<!-- MOBILE FILTER BUTTON (samo na mobilnoj) -->
+<div class="d-md-none mb-3 mobile-filter">
+  <button
+    type="button"
+    class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
+    data-bs-toggle="offcanvas"
+    data-bs-target="#sellCarFilterOffcanvas"
+    aria-controls="sellCarFilterOffcanvas">
+    <i class="bi bi-funnel"></i>
+    Filter
+  </button>
+</div>
+
+<!-- DESKTOP STATUS FILTER BAR (samo na desktopu) -->
+<div class="filter-bar card shadow-sm border-0 rounded-4 mb-4 d-none d-md-block">
+  <div class="card-body py-3 px-3 px-md-4 d-flex align-items-center gap-3">
+
+    <div class="filter-icon d-flex align-items-center justify-content-center rounded-3">
+      <i class="bi bi-funnel"></i>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="btn filter-pill"
+        [class.active]="selectedStatus === 'all'"
+        (click)="selectedStatus = 'all'">
+        All
+      </button>
+
+      <button
+        type="button"
+        class="btn filter-pill"
+        [class.active]="selectedStatus === 'pending'"
+        (click)="selectedStatus = 'pending'">
+        Pending
+      </button>
+
+      <button
+        type="button"
+        class="btn filter-pill"
+        [class.active]="selectedStatus === 'approved'"
+        (click)="selectedStatus = 'approved'">
+        Approved
+      </button>
+
+      <button
+        type="button"
+        class="btn filter-pill"
+        [class.active]="selectedStatus === 'rejected'"
+        (click)="selectedStatus = 'rejected'">
+        Rejected
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE OFFCANVAS FILTER -->
+<div
+  class="offcanvas offcanvas-bottom rounded-top-4"
+  tabindex="-1"
+  id="sellCarFilterOffcanvas"
+  aria-labelledby="sellCarFilterOffcanvasLabel">
+
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title d-flex align-items-center gap-2" id="sellCarFilterOffcanvasLabel">
+      <i class="bi bi-funnel"></i>
+      Filter
+    </h5>
+
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <div class="d-flex flex-column gap-2">
+
+      <button
+        type="button"
+        class="btn filter-pill w-100"
+        [class.active]="selectedStatus === 'all'"
+        (click)="selectedStatus = 'all'"
+        data-bs-dismiss="offcanvas">
+        All
+      </button>
+
+      <button
+        type="button"
+        class="btn filter-pill w-100"
+        [class.active]="selectedStatus === 'pending'"
+        (click)="selectedStatus = 'pending'"
+        data-bs-dismiss="offcanvas">
+        Pending
+      </button>
+
+      <button
+        type="button"
+        class="btn filter-pill w-100"
+        [class.active]="selectedStatus === 'approved'"
+        (click)="selectedStatus = 'approved'"
+        data-bs-dismiss="offcanvas">
+        Approved
+      </button>
+
+      <button
+        type="button"
+        class="btn filter-pill w-100"
+        [class.active]="selectedStatus === 'rejected'"
+        (click)="selectedStatus = 'rejected'"
+        data-bs-dismiss="offcanvas">
+        Rejected
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- SELL CAR REQUEST CARDS -->
+<div
+  *ngFor="let req of filteredSellCarRequests"
+  class="card mb-3 shadow-sm border-0 rounded-4 sellcar-card">
+
+  <div class="card-body">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h6 class="mb-1">
+          {{ req.ownerName }}
+          <span
+            class="badge ms-2"
+            [ngClass]="{
+              'bg-warning text-dark': req.status === 'pending',
+              'bg-primary': req.status === 'approved',
+              'bg-danger': req.status === 'rejected'
+            }">
+            {{ req.status }}
+          </span>
+        </h6>
+
+        <small class="text-muted">
+          Submitted: {{ req.submittedAt }}
+        </small>
+      </div>
+
+      <i class="bi bi-eye text-secondary"></i>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="row">
+      <div class="col-md-6">
+        <small class="text-muted">Vehicle</small>
+        <p class="fw-semibold mb-3">{{ req.vehicle }}</p>
+
+        <small class="text-muted">Mileage</small>
+        <p class="fw-semibold mb-3">{{ req.mileage }}</p>
+
+        <small class="text-muted">Condition</small>
+        <p class="fw-semibold mb-3">{{ req.condition }}</p>
+
+        <small class="text-muted">Description</small>
+        <p class="mb-0">{{ req.description }}</p>
+      </div>
+
+      <div class="col-md-6">
+        <small class="text-muted">Year</small>
+        <p class="fw-semibold mb-3">{{ req.year }}</p>
+
+        <small class="text-muted">Asking Price</small>
+        <p class="fw-semibold mb-3">{{ req.askingPrice }}</p>
+
+        <small class="text-muted">Email</small>
+        <p class="fw-semibold mb-3">{{ req.email }}</p>
+
+        <small class="text-muted">Phone</small>
+        <p class="fw-semibold mb-0">{{ req.phone }}</p>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="border-top pt-3 mt-3 d-flex gap-2">
+
+      <button
+        *ngIf="req.status === 'pending'"
+        class="btn btn-success btn-sm d-flex align-items-center gap-1"
+        (click)="approve(req)">
+        <i class="bi bi-check-circle"></i>
+        Approve
+      </button>
+
+      <button
+        *ngIf="req.status === 'pending'"
+        class="btn btn-danger btn-sm d-flex align-items-center gap-1"
+        (click)="reject(req)">
+        <i class="bi bi-x-circle"></i>
+        Reject
+      </button>
+
+    </div>
+
+  </div>
+</div>

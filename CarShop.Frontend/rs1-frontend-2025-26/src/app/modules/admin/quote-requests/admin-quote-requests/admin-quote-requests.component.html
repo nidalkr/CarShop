@@ -1,0 +1,237 @@
+<div class="quote-requests">
+
+  <!-- OFFCANVAS (mobile) - BOTTOM SHEET -->
+  <div
+    class="offcanvas offcanvas-bottom qr-offcanvas rounded-top-4"
+    tabindex="-1"
+    id="quoteRequestsFilterOffcanvas"
+    aria-labelledby="quoteRequestsFilterOffcanvasLabel"
+  >
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title d-flex align-items-center gap-2" id="quoteRequestsFilterOffcanvasLabel">
+        <i class="bi bi-funnel"></i>
+        Filter
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body">
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Status</label>
+
+        <div class="d-flex flex-column gap-2">
+          <button
+            type="button"
+            class="btn filter-pill w-100"
+            [class.active]="activeStatus === 'all'"
+            (click)="setStatus('all')"
+            data-bs-dismiss="offcanvas">
+            All
+          </button>
+
+          <button
+            type="button"
+            class="btn filter-pill w-100"
+            [class.active]="activeStatus === 'pending'"
+            (click)="setStatus('pending')"
+            data-bs-dismiss="offcanvas">
+            Pending
+          </button>
+
+          <button
+            type="button"
+            class="btn filter-pill w-100"
+            [class.active]="activeStatus === 'responded'"
+            (click)="setStatus('responded')"
+            data-bs-dismiss="offcanvas">
+            Responded
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label fw-semibold">Search</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search name, email, vehicle..."
+          [(ngModel)]="searchTerm"
+          (input)="applyFilters()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE FILTER BUTTON (samo na mobilnoj) -->
+  <div class="d-md-none mb-3 mobile-filter">
+    <button
+      type="button"
+      class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
+      data-bs-toggle="offcanvas"
+      data-bs-target="#quoteRequestsFilterOffcanvas"
+      aria-controls="quoteRequestsFilterOffcanvas">
+      <i class="bi bi-funnel"></i>
+      Filter
+    </button>
+  </div>
+
+  <!-- DESKTOP STATUS FILTER BAR (samo na desktopu) -->
+  <div class="filter-bar card shadow-sm border-0 rounded-4 mb-4 d-none d-md-block">
+    <div class="card-body py-3 px-3 px-md-4 d-flex align-items-center gap-3">
+
+      <div class="filter-icon d-flex align-items-center justify-content-center rounded-3">
+        <i class="bi bi-funnel"></i>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2">
+        <button
+          type="button"
+          class="btn filter-pill"
+          [class.active]="activeStatus === 'all'"
+          (click)="setStatus('all')">
+          All
+        </button>
+
+        <button
+          type="button"
+          class="btn filter-pill"
+          [class.active]="activeStatus === 'pending'"
+          (click)="setStatus('pending')">
+          Pending
+        </button>
+
+        <button
+          type="button"
+          class="btn filter-pill"
+          [class.active]="activeStatus === 'responded'"
+          (click)="setStatus('responded')">
+          Responded
+        </button>
+      </div>
+
+      <div class="ms-auto qr-search">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-transparent">
+            <i class="bi bi-search"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search name, email, vehicle..."
+            [(ngModel)]="searchTerm"
+            (input)="applyFilters()"
+          />
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div class="row g-3">
+    <div class="col-12" *ngFor="let item of filteredRequests">
+      <div class="card shadow-sm border-0 rounded-4 qr-card">
+        <div class="card-body">
+
+          <!-- HEADER (isto kao Test Drives) -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h6 class="mb-1">
+                {{ item.fullName }}
+                <span
+                  class="badge ms-2"
+                  [ngClass]="{
+                    'bg-warning text-dark': item.status === 'pending',
+                    'bg-success': item.status === 'responded',
+                    'bg-secondary': item.status !== 'pending' && item.status !== 'responded'
+                  }">
+                  {{ item.status }}
+                </span>
+              </h6>
+
+              <small class="text-muted">
+                Submitted: {{ item.submittedAt | date:'yyyy-MM-dd HH:mm' }}
+              </small>
+            </div>
+
+            <i class="bi bi-eye text-secondary"></i>
+          </div>
+
+          <!-- CONTENT -->
+          <div class="row g-3">
+            <div class="col-12 col-lg-6">
+              <div class="qr-field">
+                <div class="qr-label">Vehicle</div>
+                <div class="qr-value">{{ item.vehicle }}</div>
+              </div>
+
+              <div class="qr-field mt-3">
+                <div class="qr-label">Inquiry Type</div>
+                <div class="qr-value">{{ item.inquiryType }}</div>
+              </div>
+
+              <div class="qr-field mt-3">
+                <div class="qr-label">Message</div>
+                <div class="qr-value message">{{ item.message }}</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <div class="qr-field">
+                    <div class="qr-label">Email</div>
+                    <div class="qr-value text-break">{{ item.email }}</div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="qr-field">
+                    <div class="qr-label">Phone</div>
+                    <div class="qr-value">{{ item.phone }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTIONS (desktop) -->
+          <div class="border-top pt-3 mt-3 d-none d-md-flex gap-2">
+            <button
+              class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2"
+              (click)="markAsResponded(item)">
+              <i class="bi bi-envelope-check"></i>
+              Mark as Responded
+            </button>
+
+            <button
+              class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
+              (click)="close(item)">
+              <i class="bi bi-x-circle"></i>
+              Close
+            </button>
+          </div>
+
+          <!-- ACTIONS (mobile) -->
+          <div class="border-top pt-3 mt-3 d-md-none d-grid gap-2">
+            <button
+              class="btn btn-primary d-inline-flex justify-content-center align-items-center gap-2"
+              (click)="markAsResponded(item)">
+              <i class="bi bi-envelope-check"></i>
+              Mark as Responded
+            </button>
+
+            <button
+              class="btn btn-outline-secondary d-inline-flex justify-content-center align-items-center gap-2"
+              (click)="close(item)">
+              <i class="bi bi-x-circle"></i>
+              Close
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

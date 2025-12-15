@@ -6,7 +6,6 @@ import {RegisterComponent} from './register/register.component';
 import {ForgotPasswordComponent} from './forgot-password/forgot-password.component';
 import {LogoutComponent} from './logout/logout.component';
 import {SharedModule} from '../shared/shared-module';
-import { AdminDashboardComponent } from '../admin/dashboard/admin-dashboard/admin-dashboard.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
@@ -15,13 +14,13 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     LoginComponent,
     RegisterComponent,
     ForgotPasswordComponent,
-    LogoutComponent
+    LogoutComponent,
+    
 
   ],
   imports: [
     AuthRoutingModule,
-    SharedModule,
-    AdminDashboardComponent,
+    SharedModule,    
     MatSnackBarModule
   ],
   exports: [
