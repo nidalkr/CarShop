@@ -1,6 +1,6 @@
 <!-- src/app/layouts/public-layout/public-layout.component.html -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-<div class="public-layout" [class.blurred]="isLoginOpen || isRegisterOpen" >
+<div class="public-layout" [class.blurred]="isLoginOpen || isRegisterOpen">
   <div class="landing-page">
     <!--NAV BAR-->
     <nav class="navbar app-navbar navbar-expand-lg" [class.is-hidden]="navHidden">
@@ -12,7 +12,7 @@
           </span>
 
           <span class="brand-text">
-            <span class="brand-title">Premium Auto</span>
+            <span class="brand-title">Autique</span>
             <span class="brand-subtitle">Gallery</span>
           </span>
         </a>
@@ -117,8 +117,16 @@
     <main class="public-main">
       <!-- Hero Section -->
       <section class="hero">
-        <!-- Background -->
-        <div class="hero__bg" aria-hidden="true"></div>
+        <!-- Background video -->
+        <div class="hero__bg" aria-hidden="true">
+          <video #heroVideo class="hero__video" autoplay muted loop playsinline preload="auto">
+            <!-- bitno: bez leading slash radi i kad promijeniš base-href -->
+            <source src="assets/hero_bg_video.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        <!-- Overlay (tamni sloj + vignette) -->
+        <div class="hero__overlay" aria-hidden="true"></div>
 
         <div class="container hero__container">
           <div class="row g-4 g-lg-5 align-items-start">

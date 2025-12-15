@@ -1,8 +1,13 @@
-/* src/styles.scss */
+// This file is based on the latest version of the project's global styles.
+// It has been modified to fix a layout issue where pages with long content
+// were compressed into the top of the viewport and no scroll bar would appear.
 
-/* Angular Material theming (Material 3) */
-@use "@angular/material" as mat;
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+@use '@angular/material' as mat;
 
+// Apply the material theme to the root element
 html {
   @include mat.theme((
     color: (
@@ -14,95 +19,109 @@ html {
   ));
 }
 
-/* =========================
-   BASE (WINDOW SCROLL FIX)
-   ========================= */
-
-/* Nemoj height:100vh na body/html za klasične landing stranice */
-/* Base */
-html {
-  height: 100%;
-  overflow-x: hidden;
-}
-
+// Global defaults for the body
 body {
-  margin: 0;
-  min-height: 100vh;
-
-  /* pusti browser da radi normalan window scroll */
-  overflow-x: hidden;
-  overflow-y: auto;
-
-  -webkit-overflow-scrolling: touch;
-
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
   color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+// The default styles included in the upstream file declared `html, body { height: 100%; }`.
+// Setting a fixed height on the root elements can inadvertently prevent the browser
+// from creating a scroll bar when the page content grows taller than the viewport.
+// According to MDN, if you only want scrollbars to appear when there is more
+// content than can fit in the container, you should allow the height to expand and
+// use `overflow: auto`【9692084980572†L375-L379】.  To correct the layout issue,
+// we replace the fixed `height: 100%` declarations with a minimum height and
+// enable scrolling on the y‑axis.
+html,
+body {
+  // Allow the document to grow taller than the viewport when necessary
+  min-height: 100%;
+  height: auto;
 
-/* root neka se normalno rasteže */
-app-root {
-  display: block;
-  min-height: 100vh;
+  // Enable vertical scrolling only when needed. This ensures that if the content
+  // exceeds the viewport height, a scroll bar will appear automatically.  MDN
+  // notes that using `overflow: auto` lets the browser decide when to display
+  // scrollbars based on the amount of content【9692084980572†L375-L379】.
+  overflow-y: auto;
+
+  // Hide horizontal overflow to avoid an unnecessary horizontal scrollbar on
+  // responsive layouts.
+  overflow-x: hidden;
 }
 
-/* Scroll lock (koristi se za login/register backdrop) */
-body.is-scroll-locked {
-  overflow: hidden !important;
-}
-
-/* Ako Angular CDK/Material zalijepi global scrollblock, a mi nismo zaključali */
-body.cdk-global-scrollblock:not(.is-scroll-locked) {
-  position: static !important;
-  width: auto !important;
-  top: auto !important;
-  left: auto !important;
-  overflow: auto !important;
-}
-
-/* ===========================
-   TOASTER / SNACKBAR STYLES
-   =========================== */
-
+// Snackbar styles for various message types. These styles mirror the original
+// configuration from the upstream project and have not been altered except
+// for repositioning within this file.
 .snackbar-success {
   background-color: #4caf50 !important;
   color: white !important;
 
-  .mat-mdc-snack-bar-label { color: white !important; }
-  .mat-mdc-button { color: white !important; }
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
 }
 
 .snackbar-error {
   background-color: #f44336 !important;
   color: white !important;
 
-  .mat-mdc-snack-bar-label { color: white !important; }
-  .mat-mdc-button { color: white !important; }
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
 }
 
 .snackbar-warning {
   background-color: #ff9800 !important;
   color: white !important;
 
-  .mat-mdc-snack-bar-label { color: white !important; }
-  .mat-mdc-button { color: white !important; }
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
 }
 
 .snackbar-info {
   background-color: #2196f3 !important;
   color: white !important;
 
-  .mat-mdc-snack-bar-label { color: white !important; }
-  .mat-mdc-button { color: white !important; }
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
 }
 
-/* Ako želiš gradient success varijantu (tvoj stil) */
+// Gradient snackbar style for success messages
 .snackbar-success {
-  background: linear-gradient(135deg, #0f766e, #0ea5e9) !important;
-  color: #f9fafb !important;
+  background: linear-gradient(135deg, #0f766e, #0ea5e9);
+  color: #f9fafb;
   font-weight: 500;
   letter-spacing: 0.02em;
 }

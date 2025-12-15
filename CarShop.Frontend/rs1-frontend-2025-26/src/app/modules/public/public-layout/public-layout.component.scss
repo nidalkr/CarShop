@@ -393,36 +393,54 @@ $accent-b: #0b57ff;
   padding: 42px 0 64px;
   overflow: hidden;
   background: $hero-bg;
-
-  /* vignette kao na slici */
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(900px 520px at 18% 45%, rgba(0, 170, 255, 0.10), transparent 60%),
-      radial-gradient(700px 480px at 78% 30%, rgba(11, 87, 255, 0.10), transparent 62%),
-      radial-gradient(1200px 700px at 50% 120%, rgba(0, 0, 0, 0.55), transparent 55%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  min-height: calc(100vh - 76px);
 }
 
+/* layer 0: video */
 .hero__bg {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(5, 8, 26, 0.75) 0%, rgba(5, 8, 26, 0.92) 70%),
-    url("/assets/bg.jpg") center/cover no-repeat;
-  filter: blur(2px);
-  transform: scale(1.04);
-  opacity: 0.55;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
+.hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+
+  /* ako želiš “slika” look – ali NE pretjeruj s blur (zna znati ubiti fluidnost) */
+  transform: scale(1.05);
+  opacity: 0.65;
+  filter: brightness(0.85) saturate(1.05);
+}
+
+/* layer 1: overlay (tamni gradient + vignette) */
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  background:
+    linear-gradient(180deg, rgba(5, 8, 26, 0.55) 0%, rgba(5, 8, 26, 0.85) 70%),
+    radial-gradient(900px 520px at 18% 45%, rgba(0, 170, 255, 0.10), transparent 60%),
+    radial-gradient(700px 480px at 78% 30%, rgba(11, 87, 255, 0.10), transparent 62%),
+    radial-gradient(1200px 700px at 50% 120%, rgba(0, 0, 0, 0.55), transparent 55%);
+}
+
+/* layer 2: content */
 .hero__container {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__bg { display: none; }
 }
 
 /* Card base (glass) */
