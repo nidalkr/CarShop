@@ -1,9 +1,7 @@
-:host {
-  display: block;
-}
+:host { display: block; }
 
-/* FULL PAGE (ako ikad koristiš /logout rutu) */
-.logout-page {
+/* FULL PAGE (/logout ruta) */
+.logout-page{
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -15,258 +13,221 @@
 }
 
 /* CARD */
-.logout-card {
+.logout-card{
   width: 480px;
   border-radius: 28px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 26px 70px rgba(8, 36, 94, 0.35);
 }
+.logout-card-compact{ margin: 0; }
 
-.logout-card-compact {
-  /* popup varijanta */
-  margin: 0;
-}
-
-/* TOP (GRADIENT HEADER) */
-.logout-header {
+/* HEADER (GRADIENT) */
+.logout-header{
   position: relative;
-  flex: 0 0 auto;
-
-  /* NEMA razvlačenja */
   min-height: clamp(150px, 18vh, 190px);
-  height: auto;
-
-  padding: 18px 22px 18px;
+  padding: 18px 22px;
   color: #fff;
   background: linear-gradient(180deg, #4f8dff 0%, #3d66ff 45%, #4b2bff 100%);
   overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 10px;
 }
 
-/* sweep krug (da ne “pojede” header kad je manji) */
-.logout-header::before {
-  content: "";
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  left: -150px;
-  bottom: -235px;
-  background: rgba(255, 255, 255, 0.18);
-  pointer-events: none;
+.logout-header::before{
+  content:"";
+  position:absolute;
+  width:320px;
+  height:320px;
+  border-radius:50%;
+  left:-150px;
+  bottom:-235px;
+  background: rgba(255,255,255,0.18);
+  pointer-events:none;
 }
 
-.logout-icon-tile {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
-
-  mat-icon {
-    color: #fff;
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    line-height: 1;
-  }
+.logout-icon-tile{
+  width:58px;
+  height:58px;
+  border-radius:18px;
+  background: rgba(255,255,255,0.18);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+}
+.logout-icon-tile mat-icon{
+  color:#fff;
+  font-size:20px;
+  width:20px;
+  height:20px;
+  line-height:1;
 }
 
-.logout-title {
-  margin: 2px 0 0;
-  font-size: 24px;      /* malo veće da “popuni” */
-  font-weight: 800;
-  line-height: 1.05;
+.logout-title{
+  font-size:24px;
+  font-weight:800;
+  line-height:1.05;
 }
 
-.logout-subtitle {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.35;
-  opacity: 0.92;
-
-  /* KLJUČ: prirodno prelamanje u 2-3 reda da header djeluje popunjen */
-  max-width: 170px;
+.logout-subtitle{
+  font-size:14px;
+  line-height:1.35;
+  opacity:0.92;
+  max-width:170px; /* prirodno prelamanje kao prije */
 }
 
-
-.logout-icon-tile {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
-
-  mat-icon {
-    color: #ffffff;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    line-height: 1;
-  }
-}
-
-.logout-title {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-}
-
-.logout-subtitle {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.35;
-  opacity: 0.92;
-}
-
-/* BOTTOM (WHITE BODY) */
-.logout-body {
+/* BODY */
+.logout-body{
   position: relative;
-  padding: 26px 26px 26px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
+  padding: 26px;
   gap: 14px;
   background: #fff;
 }
 
-/* “shadow seam” između headera i body kao na slici */
-.logout-body::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -18px;
-  height: 18px;
+.logout-body::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:-18px;
+  height:18px;
   background: linear-gradient(to bottom, rgba(9, 25, 70, 0.18), transparent);
 }
 
-.status-icon {
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
-  background: #e8f7ec;
-  display: grid;
-  place-items: center;
-  margin: 0 auto 2px;
-
-  mat-icon {
-    font-size: 30px;
-    width: 30px;
-    height: 30px;
-    line-height: 1;
-    color: #21a35b;
-  }
+.status-icon{
+  width:86px;
+  height:86px;
+  border-radius:50%;
+  background:#e8f7ec;
+  display:grid;
+  place-items:center;
+  margin-bottom: 2px;
+}
+.status-icon mat-icon{
+  font-size:30px;
+  width:30px;
+  height:30px;
+  line-height:1;
+  color:#21a35b;
 }
 
-.logout-message {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 800;
-  color: #18213c;
+.logout-message{
+  font-size:20px;
+  font-weight:800;
+  color:#18213c;
 }
 
-.logout-description {
-  margin: 0 auto;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #6a789b;
-  max-width: 240px;
+.logout-description{
+  font-size:14px;
+  line-height:1.55;
+  color:#6a789b;
+  max-width:240px;
 }
 
-/* PROGRESS BOX */
-.logout-progress-card {
-  width: 88%;
-  max-width: 350px;
-  margin: 10px auto 0;
-  border-radius: 18px;
-  padding: 14px 16px 14px;
-  background: #f5f9ff;
-  border: 1px solid #e0eaff;
+/* PROGRESS CARD */
+.logout-progress-card{
+  width:88%;
+  max-width:350px;
+  margin-top: 10px;
+  border-radius:18px;
+  padding:14px 16px;
+  background:#f5f9ff;
+  border:1px solid #e0eaff;
 }
 
-.progress-track {
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: #dbe6ff;
-  overflow: hidden;
+.progress-track{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:#dbe6ff;
+  overflow:hidden;
 }
 
-.logout-progress-bar {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
+.logout-progress-bar{
+  width:100%;
+  height:100%;
+  border-radius:inherit;
   background: linear-gradient(90deg, #1e63ff 0%, #2f5bff 40%, #3f2dff 100%);
-  transform-origin: left center;
+  transform-origin:left center;
   transform: scaleX(0);
 }
-
-/* animaciju palimo tek kad starta countdown */
-.logout-progress-bar.is-active {
+.logout-progress-bar.is-active{
   animation-name: progressFill;
   animation-timing-function: linear;
   animation-fill-mode: forwards;
 }
 
-.progress-footer {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: #41527a;
+.progress-footer{
+  margin-top:10px;
+  gap:10px;
+  color:#41527a;
 }
 
-.progress-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: #e4edff;
-  display: grid;
-  place-items: center;
+.progress-icon{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:#e4edff;
+  display:grid;
+  place-items:center;
+}
+.progress-icon mat-icon{
+  font-size:16px;
+  width:16px;
+  height:16px;
+  line-height:1;
+  color:#2b7be9;
+}
 
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    line-height: 1;
-    color: #2b7be9;
+.progress-text{
+  line-height:1.1;
+  font-size:13px;
+}
+
+.progress-count strong{
+  color:#1e63ff;
+  font-weight:800;
+}
+
+/* ===== Standardni breakpoints (Bootstrap) ===== */
+
+/* lg and down (≤ 991.98px) */
+@media (max-width: 991.98px){
+  .logout-card{ width: 420px; border-radius: 24px; }
+  .logout-header{ padding: 18px 20px; min-height: 160px; }
+  .logout-subtitle{ max-width: 220px; }
+  .logout-body{ padding: 22px 20px; }
+  .status-icon{ width: 78px; height: 78px; }
+  .logout-message{ font-size: 18.5px; }
+}
+
+/* md and down (≤ 767.98px) */
+@media (max-width: 767.98px){
+  .logout-card{ width: 94vw; border-radius: 22px; }
+  .logout-header{ padding: 16px 18px; min-height: 150px; }
+  .logout-icon-tile{ width: 50px; height: 50px; border-radius: 16px; }
+  .logout-title{ font-size: 20px; }
+  .logout-subtitle{ max-width: 240px; font-size: 13px; }
+  .logout-body{ padding: 20px 18px; gap: 12px; }
+  .logout-description{ max-width: 300px; font-size: 13.5px; }
+  .logout-progress-card{ width: 100%; }
+}
+
+/* sm and down (≤ 575.98px) */
+@media (max-width: 575.98px){
+  .logout-card{ width: 92vw; border-radius: 20px; }
+  .logout-header{ padding: 14px 16px; min-height: 140px; gap: 8px; }
+  .logout-header::before{
+    width: 280px; height: 280px;
+    left: -140px; bottom: -215px;
   }
-}
-
-.progress-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-  font-size: 13px;
-  text-align: left;
-}
-
-.progress-label {
-  opacity: 0.95;
-}
-
-.progress-count strong {
-  color: #1e63ff;
-  font-weight: 800;
+  .logout-icon-tile{ width: 46px; height: 46px; border-radius: 14px; }
+  .logout-icon-tile mat-icon{ font-size: 18px; width: 18px; height: 18px; }
+  .logout-title{ font-size: 18.5px; }
+  .logout-subtitle{ font-size: 12.5px; }
+  .logout-body{ padding: 18px 16px; gap: 10px; }
+  .status-icon{ width: 70px; height: 70px; }
+  .status-icon mat-icon{ font-size: 24px; width: 24px; height: 24px; }
+  .logout-message{ font-size: 17px; }
+  .progress-text{ font-size: 12px; }
 }
 
 /* ANIM */
-@keyframes progressFill {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+@keyframes progressFill{
+  from{ transform: scaleX(0); }
+  to{ transform: scaleX(1); }
 }

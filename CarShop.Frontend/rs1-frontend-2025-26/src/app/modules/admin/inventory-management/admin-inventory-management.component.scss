@@ -459,8 +459,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-
-  
 }
 
 .btn-soft{
@@ -715,6 +713,10 @@
   align-items: center;
   justify-content: space-between;
 }
+.inv-modal-actions .btn-modal{
+  flex: 1 1 0;
+  min-width: 0;
+}
 
 .btn-modal{
   height: 44px;
@@ -739,17 +741,32 @@
   &.danger{ background: #ef4444; color:#fff; }
   &.warn{ background: #f97316; color:#fff; }
 
+  /* ✅ FIX: icon button više nije 44px (da Delete izgleda kao ostali) */
   &.icon{
-    width: 44px;
-    padding: 0;
+    width: auto;              /* <-- promjena */
+    min-width: 44px;
+    padding: 0 14px;          /* <-- promjena */
     border: 1px solid #e8eef7;
     background: #fff;
     color: #0f172a;
 
     .material-icons{ color:#64748b; }
+    &:hover{ background:#f8fbff; }
+  }
+
+  /* ✅ (Opcionalno) ako želiš da Delete izgleda “outlined danger” */
+  &.icon.delete{
+    border-color: #fecdd3;
+    color: #e11d48;
+    background: #fff;
+
+    .material-icons{ color:#e11d48; }
+
+    &:hover{
+      background: #fff1f2;
+    }
   }
 }
-
 
 /* POP UP Dialog for delete button */
 .inv-confirm-modal {
@@ -796,26 +813,26 @@
 }
 
 .btn-danger {
-    height: 42px;
-    border-radius: 12px;
-    border: 0;
-    background: #ef4444;
-    color: #ffff;
-    font-weight: 900;
-    font-size: 14px;
-    padding: 0 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+  height: 42px;
+  border-radius: 12px;
+  border: 0;
+  background: #ef4444;
+  color: #ffff;
+  font-weight: 900;
+  font-size: 14px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
+
 @media (max-width: 768px) {
   .inv-confirm-actions {
     flex-direction: column;
     justify-content: baseline;
   }
 }
-
 
 /* =========================
    RESPONSIVE
@@ -828,10 +845,7 @@
 @media (max-width: 900px){
   .inv-modal-grid{ grid-template-columns: repeat(2, minmax(160px, 1fr)); }
   .features{ grid-template-columns: 1fr; }
-  .inv-modal-actions{
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
+  
 }
 
 @media (max-width: 768px){
@@ -869,4 +883,13 @@
   .vehicle-actions-grid{
     grid-template-columns: 1fr 1fr;
   }
+  .inv-modal-actions{
+    flex-direction: column;
+    
+  }
+  .inv-modal-actions .btn-modal{
+  padding: 15px 0;
+  width: 190px;
+}
+
 }

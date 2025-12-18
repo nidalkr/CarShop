@@ -1,6 +1,5 @@
 :host {
   display: block;
- 
   background: #f5f7fb;
   font-family: 'Inter', sans-serif;
   --topbar-h: 60px;
@@ -16,34 +15,23 @@
   scroll-padding-top: calc(var(--topbar-h) + env(safe-area-inset-top) + 16px);
 }
 
-/* NAVBAR */
+/* NAVBAR / TOP BAR */
 .top-bar {
   position: fixed;
   top: 0; left: 0; right: 0;
+
   height: calc(var(--topbar-h) + env(safe-area-inset-top));
   padding-top: env(safe-area-inset-top);
+
   z-index: 1050;
-  background: #fff;
+  background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
-}
-/* TOP BAR */
-.top-bar .container {
-  max-width: 1200px;
-}
-
-.top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-
-  height: calc(var(--topbar-h) + env(safe-area-inset-top));
-  padding-top: env(safe-area-inset-top);
 
   display: flex;
-  z-index: 1050;
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
+}
+
+.top-bar .container {
+  max-width: 1200px;
 }
 
 .top-bar-inner {
@@ -64,11 +52,13 @@
   align-items: center;
   gap: 12px;
 }
+
 .top-bar-right {
   display: flex;
   align-items: center;
 }
 
+/* Back + title */
 .back-btn { color: #4b5563; }
 .back-btn .material-icons { font-size: 22px; }
 
@@ -81,6 +71,7 @@
 .breadcrumb-text {
   font-size: 16px;
   color: #4b5563;
+  cursor: pointer;
 }
 
 .page-title {
@@ -90,12 +81,9 @@
   color: #111827;
 }
 
-.primary-button {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-/* OFFCANVAS */
+/* =========================
+   OFFCANVAS (mobile menu)
+   ========================= */
 .logout-section {
   border-top: 1px solid #e5e7eb;
 }
@@ -113,12 +101,16 @@
   color: #b91c1c;
 }
 
-.logout-btn .material-icons { font-size: 20px; }
+.logout-btn .material-icons {
+  font-size: 20px;
+}
 
-/* TABS */
+/* =========================
+   TABS (desktop)
+   ========================= */
 .tab-nav-desktop {
   border-bottom: 1px solid transparent;
-  margin: 0px 15px;  
+  margin: 0px 15px;
   justify-content: space-evenly;
 }
 
@@ -138,7 +130,9 @@
   border-bottom-color: #2563eb;
 }
 
-/* MOBILE OFFCANVAS */
+/* =========================
+   MOBILE OFFCANVAS
+   ========================= */
 .menu-button {
   border-radius: 999px;
   padding-inline: 10px;
@@ -174,9 +168,70 @@
   background: #eff6ff;
 }
 
+/* =========================
+   DESKTOP LOGOUT BUTTON
+   ========================= */
+.logout-btn-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #ffffff;
+  border: 1px solid #b9babb;
+  border-radius: 10px;
+
+  padding: 6px 14px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  color: #dc2626; 
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.12s ease;
+
+    
+
+  .logout-icon {
+    font-size: 20px;
+    color: #dc2626;
+    transition: transform 0.2s ease;
+  }
+
+
+  /* HOVER – very subtle */
+  &:hover {
+    background: #f9fafb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    .logout-icon {
+      transform: translateX(2px);
+    }
+  }
+
+  /* ACTIVE – press feel */
+  &:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+}
+
+
+
+
+
+
+/*  Sakrij na mobitelu */
+@media (max-width: 768px) {
+  .logout-btn-desktop {
+    display: none !important;
+  }
+}
+
 
 @media (max-width: 430px) {
   :host { --topbar-h: 72px; }
-
-  
 }

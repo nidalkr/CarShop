@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthFacadeService } from '../../../core/services/auth/auth-facade.service';
 
+
 @Component({
   selector: 'app-logout',
   standalone: false,

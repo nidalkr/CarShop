@@ -14,29 +14,29 @@
 
 <ng-template #logoutCardContent>
   <!-- TOP (GRADIENT) -->
-  <div class="logout-header">
-    <div class="logout-icon-tile" aria-hidden="true">
+  <div class="logout-header d-flex flex-column align-items-start justify-content-start gap-2">
+    <div class="logout-icon-tile d-inline-flex align-items-center justify-content-center" aria-hidden="true">
       <mat-icon>logout</mat-icon>
     </div>
 
-    <h2 class="logout-title">Odjava</h2>
+    <h2 class="logout-title mb-0">Odjava</h2>
 
-    <p class="logout-subtitle">Sigurno ste odjavljeni sa sistema</p>
+    <p class="logout-subtitle mb-0">Sigurno ste odjavljeni sa sistema</p>
   </div>
 
   <!-- BOTTOM (WHITE) -->
-  <div class="logout-body">
-    <div class="status-icon success" aria-hidden="true">
+  <div class="logout-body text-center d-flex flex-column">
+    <div class="status-icon success mx-auto" aria-hidden="true">
       <mat-icon>check</mat-icon>
     </div>
 
-    <h3 class="logout-message">Odjavljivanje uspješno</h3>
+    <h3 class="logout-message mb-0">Odjavljivanje uspješno</h3>
 
-    <p class="logout-description">
+    <p class="logout-description mb-0 mx-auto">
       Možete ponovo pristupiti sistemu u bilo kojem trenutku prijavom na svoj nalog.
     </p>
 
-    <div class="logout-progress-card" role="status" aria-live="polite">
+    <div class="logout-progress-card mx-auto" role="status" aria-live="polite">
       <div class="progress-track">
         <div
           class="logout-progress-bar"
@@ -45,12 +45,12 @@
         ></div>
       </div>
 
-      <div class="progress-footer">
+      <div class="progress-footer d-flex align-items-center justify-content-center">
         <span class="progress-icon" aria-hidden="true">
           <mat-icon>schedule</mat-icon>
         </span>
 
-        <span class="progress-text">
+        <span class="progress-text d-flex flex-column text-start">
           <span class="progress-label">
             {{ redirectToLogin ? 'Preusmjeravanje' : 'Zatvaranje' }}
           </span>

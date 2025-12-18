@@ -2,6 +2,10 @@ import { Component, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthFacadeService } from '../../../core/services/auth/auth-facade.service';
 import { Router } from '@angular/router';
+import { LogoutComponent } from '../../auth/logout/logout.component';
+import { MatDialog } from '@angular/material/dialog';
+import { take } from 'rxjs';
+
 
 @Component({
   selector: 'app-admin-layout',
@@ -27,10 +31,25 @@ export class AdminLayoutComponent {
       this.router.navigate(['/']);
     }
 
-    onLogout() {
-      localStorage.clear();
-      this.router.navigate(['/auth/logout']);
-    }
+    private dialog = inject(MatDialog);
+    openLogoutPopup() {
+    const ref = this.dialog.open(LogoutComponent, {
+      hasBackdrop: true,      
+      autoFocus: false,
+      restoreFocus: true,
+      disableClose: true, 
+      panelClass: 'logout-dialog-panel',
+      backdropClass: 'logout-dialog-backdrop',
+    });
 
+    
+    ref.componentInstance.redirectToLogin = true; 
+    ref.componentInstance.compact = true;        
+
+    
+    ref.componentInstance.completed.pipe(take(1)).subscribe(() => {
+      ref.close();
+    });
+  }
 
 }

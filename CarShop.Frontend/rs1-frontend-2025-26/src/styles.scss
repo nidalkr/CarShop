@@ -125,3 +125,18 @@ body {
   font-weight: 500;
   letter-spacing: 0.02em;
 }
+/* ===== Logout dialog backdrop (FULL SCREEN + BLUR) ===== */
+.cdk-overlay-backdrop.logout-dialog-backdrop {
+  background: rgba(15, 23, 42, 0.35) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 1 !important;
+  
+}
+.logout-dialog-panel app-logout {
+  overflow: hidden;
+}
+
+
+
+
