@@ -98,6 +98,8 @@ $nav-grad-a: #00b4dd; // svjetliji
 $nav-grad-b: #0052af; // tamniji
 $nav-text: rgba(235, 242, 255, 0.78);
 $nav-text-strong: rgba(255, 255, 255, 0.95);
+$nav-glass: rgba(8, 12, 28, 0.55);
+$nav-glass-2: rgba(8, 12, 28, 0.78);
 $hero-bg: #05081a;
 $glass: rgba(12, 18, 40, 0.72);
 $glass-2: rgba(10, 16, 36, 0.78);
@@ -107,26 +109,74 @@ $text-muted: rgba(235, 242, 255, 0.68);
 $accent-a: #0aaeff;
 $accent-b: #0b57ff;
 
+/* ===========================
+   NAVBAR – deblji + glass
+   =========================== */
+
+
 .app-navbar {
-  position: fixed; /* umjesto sticky */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 900;
 
-  padding: 12px 0;
+  /* ✅ deblji */
+  padding: 18px 0;              /* bilo 12px */
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
 
-  background: $nav-bg;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  /* ✅ glass background (gradient) */
+  background:
+    linear-gradient(180deg, $nav-glass 0%, $nav-glass-2 100%);
 
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55);
+  /* ✅ tanki glass border + mekša sjena */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
-  /* animacija pojavi/nestani */
+  /* animacija hide/show ostaje */
   transform: translateY(0);
   opacity: 1;
   transition: transform 220ms ease, opacity 220ms ease;
   will-change: transform, opacity;
+
+  /* ✅ glass highlight “shine” */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.22),
+      transparent
+    );
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  /* ✅ suptilni ambient glow */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(800px 220px at 20% 0%, rgba(10, 174, 255, 0.10), transparent 60%),
+      radial-gradient(700px 240px at 80% 0%, rgba(11, 87, 255, 0.10), transparent 62%);
+    opacity: 0.8;
+  }
+
+  /* da sadržaj bude iznad ::after */
+  .app-navbar__inner {
+    position: relative;
+    z-index: 2;
+  }
 
   &.is-hidden {
     transform: translateY(-120%);
@@ -134,6 +184,23 @@ $accent-b: #0b57ff;
     pointer-events: none;
   }
 }
+
+/* ✅ malo veći “feel” unutra */
+.app-navbar__inner {
+  min-height: 68px; /* bilo 56px */
+}
+
+/* pošto je navbar deblji, update padding-top na contentu */
+.public-main {
+  padding-top: 86px; /* bilo 76px (fine-tune po potrebi) */
+  background-color: #05081a;
+}
+
+/* i scroll offset (da anchor scroll bude tačan) */
+section[id], footer[id] {
+  scroll-margin-top: 86px;
+}
+
 
 .app-navbar__inner {
   position: relative;
@@ -1016,6 +1083,48 @@ $accent-b: #0b57ff;
   }
 }
 
+/* =========================================================
+   COLLECTIONS – stagger reveal
+   ========================================================= */
+
+@keyframes collectionIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.985);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, -3px, 0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* initial state (prije nego postane vidljivo) */
+.collections .collection-card {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0) scale(0.985);
+  will-change: transform, opacity;
+}
+
+/* kad sekcija uđe u view */
+.collections.is-visible .collection-card {
+  animation: collectionIn 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms) both;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .collections .collection-card,
+  .collections.is-visible .collection-card {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+
 @media (max-width: 575.98px) {
   .collection-card {
     height: 380px;
@@ -1140,8 +1249,8 @@ $accent-b: #0b57ff;
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.10) 18%,
-      rgba(255, 255, 255, 0.10) 82%,
+      rgba(255, 255, 255, 0.1) 18%,
+      rgba(255, 255, 255, 0.1) 82%,
       transparent 100%
     );
     opacity: 1;
@@ -1323,7 +1432,6 @@ $accent-b: #0b57ff;
     filter: none !important;
   }
 }
-
 
 /* =========================================================
    PREMIUM EXPERIENCE (compatible with your premiumFeatures)
@@ -1530,6 +1638,7 @@ $accent-b: #0b57ff;
   z-index: 1;
 }
 
+
 /* Head */
 .visit__kicker {
   font-size: 13px;
@@ -1540,7 +1649,6 @@ $accent-b: #0b57ff;
 
   opacity: 0;
   transform: translateY(10px);
-  filter: blur(2px);
   transition: 600ms ease;
 }
 
@@ -1558,7 +1666,6 @@ $accent-b: #0b57ff;
 
   opacity: 0;
   transform: translateY(12px);
-  filter: blur(2px);
   transition: 680ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1571,7 +1678,6 @@ $accent-b: #0b57ff;
 
   opacity: 0;
   transform: translateY(12px);
-  filter: blur(2px);
   transition: 680ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1589,7 +1695,6 @@ $accent-b: #0b57ff;
 
   opacity: 0;
   transform: translateY(14px);
-  filter: blur(2px);
   transition: 700ms cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--d, 0ms);
 }
@@ -1638,7 +1743,6 @@ $accent-b: #0b57ff;
 
   opacity: 0;
   transform: translateY(14px);
-  filter: blur(2px);
   transition-delay: var(--d, 0ms);
 
   &:hover {
@@ -1655,6 +1759,7 @@ $accent-b: #0b57ff;
 .visit__mapWrap {
   border-radius: 18px;
   overflow: hidden;
+  contain: paint;
 
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1663,8 +1768,28 @@ $accent-b: #0b57ff;
   /* reveal */
   opacity: 0;
   transform: translateY(16px);
-  filter: blur(3px);
   transition: 800ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.visit__mapPlaceholder {
+  width: 100%;
+  height: 520px;
+  border: 0;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  cursor: pointer;
+
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(235, 242, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .visit__map {
@@ -1733,48 +1858,107 @@ $accent-b: #0b57ff;
     filter: none !important;
   }
 }
-
 /* =========================================================
-   SELL YOUR VEHICLE (glass mega card)
+   SELL YOUR VEHICLE – “power” reveal (dock tiles + CTA shimmer)
+   Perf: samo transform/opacity (bez blur filtera)
    ========================================================= */
 
 .sell {
   position: relative;
   padding: 96px 0 110px;
   overflow: hidden;
-
   background: linear-gradient(180deg, #06163b 0%, #05081a 42%, #05081a 100%);
 }
 
-.sell .container {
-  position: relative;
-  z-index: 1;
+.sell .container { position: relative; z-index: 1; }
+
+/* ---- Keyframes ---- */
+@keyframes sellCardIn {
+  0%   { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.985); }
+  65%  { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.004); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
-/* BIG CARD */
+@keyframes sellSheen {
+  0%   { opacity: 0; transform: translateX(-80%) rotate(18deg); }
+  20%  { opacity: 0.85; }
+  100% { opacity: 0; transform: translateX(140%) rotate(18deg); }
+}
+
+@keyframes sellFadeUp {
+  0%   { opacity: 0; transform: translate3d(0, 16px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* tile “dock” (malo overshoot pa sjedne) */
+@keyframes sellTileDock {
+  0%   { opacity: 0; transform: translate3d(var(--tx, 0px), var(--ty, 18px), 0) scale(0.96); }
+  70%  { opacity: 1; transform: translate3d(0, -4px, 0) scale(1.015); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* CTA “pop” + osjećaj snage */
+@keyframes sellCtaPop {
+  0%   { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.97); }
+  65%  { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.02); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* ---- Card ---- */
 .sell__card {
   border-radius: 28px;
   border: 1px solid rgba(0, 200, 120, 0.22);
-  background: radial-gradient(900px 420px at 75% 25%, rgba(0, 200, 120, 0.12), transparent 70%),
-    linear-gradient(
-      135deg,
-      rgba(12, 18, 40, 0.72) 0%,
-      rgba(6, 18, 34, 0.78) 55%,
-      rgba(8, 26, 32, 0.72) 100%
-    );
-
+  background:
+    radial-gradient(900px 420px at 75% 25%, rgba(0, 200, 120, 0.12), transparent 70%),
+    linear-gradient(135deg, rgba(12, 18, 40, 0.72) 0%, rgba(6, 18, 34, 0.78) 55%, rgba(8, 26, 32, 0.72) 100%);
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
   padding: 58px 60px;
 
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+  will-change: transform, opacity;
 
-  /* reveal base */
   opacity: 0;
-  transform: translateY(18px);
-  filter: blur(3px);
-  transition: 800ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(0, 18px, 0) scale(0.985);
+
+  /* “border glow” (mocniji dojam) */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 28px;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(700px 260px at 20% 15%, rgba(0, 220, 140, 0.18), transparent 60%),
+      radial-gradient(700px 260px at 85% 85%, rgba(0, 160, 255, 0.10), transparent 62%);
+    transition: opacity 520ms ease;
+  }
+
+  /* sheen sweep */
+  &::after {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -70%;
+    width: 55%;
+    height: 240%;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0) 30%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0) 70%,
+      transparent 100%
+    );
+    opacity: 0;
+    pointer-events: none;
+  }
 }
+
+/* ---- Left content initial ---- */
+.sell__kicker, .sell__title, .sell__subtitle { opacity: 0; transform: translate3d(0, 16px, 0); will-change: transform, opacity; }
 
 .sell__kicker {
   font-size: 13px;
@@ -1782,11 +1966,6 @@ $accent-b: #0b57ff;
   text-transform: uppercase;
   color: rgba(0, 220, 140, 0.95);
   margin-bottom: 18px;
-
-  opacity: 0;
-  transform: translateY(10px);
-  filter: blur(2px);
-  transition: 650ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sell__title {
@@ -1796,16 +1975,10 @@ $accent-b: #0b57ff;
   font-weight: 500;
   font-size: clamp(46px, 5.2vw, 74px);
   line-height: 1.05;
-
-  span {
-    display: block;
-  }
-
-  opacity: 0;
-  transform: translateY(12px);
-  filter: blur(2px);
-  transition: 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  span { display: block; }
 }
+
+
 
 .sell__subtitle {
   margin: 0 0 30px;
@@ -1813,14 +1986,9 @@ $accent-b: #0b57ff;
   font-size: 16.5px;
   line-height: 1.75;
   color: rgba(235, 242, 255, 0.72);
-
-  opacity: 0;
-  transform: translateY(12px);
-  filter: blur(2px);
-  transition: 700ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* CTA */
+/* ---- CTA (shimmer + glow) ---- */
 .sell__cta {
   height: 56px;
   padding: 0 26px;
@@ -1842,54 +2010,75 @@ $accent-b: #0b57ff;
   transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
 
   opacity: 0;
-  transform: translateY(12px);
-  filter: blur(2px);
-  transition-delay: 220ms;
+  transform: translate3d(0, 14px, 0) scale(0.97);
+  will-change: transform, opacity;
+
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  /* glow ring */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 18px;
+    background: radial-gradient(160px 70px at 35% 50%, rgba(0, 255, 170, 0.22), transparent 65%);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 220ms ease;
+  }
+
+  /* shimmer */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -60%;
+    width: 50%;
+    height: 180%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+    transform: rotate(18deg);
+    opacity: 0.0;
+    pointer-events: none;
+  }
 
   &:hover {
     transform: translateY(-1px);
     filter: brightness(1.02);
-    box-shadow: 0 28px 66px rgba(0, 200, 120, 0.26);
+    box-shadow: 0 28px 66px rgba(0, 200, 120, 0.28);
+
+    &::after { opacity: 1; }
+    &::before { animation: sellSheen 900ms ease-out 0ms 1 both; }
   }
 
-  &:active {
-    transform: translateY(0);
-  }
+  &:active { transform: translateY(0); }
 }
 
 .sell__ctaIcon {
-  width: 34px;
-  height: 34px;
+  width: 34px; height: 34px;
   border-radius: 12px;
-
-  display: grid;
-  place-items: center;
-
+  display: grid; place-items: center;
   background: rgba(0, 0, 0, 0.18);
   color: rgba(255, 255, 255, 0.95);
   font-weight: 900;
 }
 
-.sell__ctaArrow {
-  width: 20px;
-  height: 20px;
-  font-size: 20px;
-  opacity: 0.95;
-}
+.sell__ctaArrow { width: 20px; height: 20px; font-size: 20px; opacity: 0.95; }
 
-/* RIGHT GRID */
+/* ---- Right tiles ---- */
 .sell__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 30px;
   align-content: center;
 }
 
 .sell-tile {
   border-radius: 18px;
-  padding: 22px 22px;
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(12, 18, 40, 0.45);
 
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
@@ -1897,18 +2086,15 @@ $accent-b: #0b57ff;
 
   display: grid;
   place-items: center;
-  gap: 16px;
   text-align: center;
   min-height: 132px;
 
-  /* reveal */
   opacity: 0;
-  transform: translateY(14px);
-  filter: blur(2px);
-  transition-delay: var(--d, 0ms);
+  transform: translate3d(var(--tx, 0px), var(--ty, 18px), 0) scale(0.96);
+  will-change: transform, opacity;
 
   &:hover {
-    transform: translateY(-3px);
+    transform: translate3d(0, -3px, 0) scale(1);
     border-color: rgba(0, 220, 140, 0.22);
     box-shadow: 0 26px 72px rgba(0, 200, 120, 0.14);
   }
@@ -1922,8 +2108,9 @@ $accent-b: #0b57ff;
   display: grid;
   place-items: center;
 
-  background: rgba(0, 200, 120, 0.1);
+  background: rgba(0, 200, 120, 0.12);
   border: 1px solid rgba(0, 220, 140, 0.22);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
 
   mat-icon {
     color: rgba(0, 220, 140, 0.95);
@@ -1935,68 +2122,50 @@ $accent-b: #0b57ff;
 
 .sell-tile__text {
   color: rgba(245, 249, 255, 0.95);
-  font-weight: 650;
+  font-weight: 550;
   font-size: 16px;
+  letter-spacing: 0.1px;
 }
 
-/* Visible */
+/* ---- Visible orchestration ---- */
 .sell.is-visible .sell__card {
-  opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
-}
-.sell.is-visible .sell__kicker,
-.sell.is-visible .sell__title,
-.sell.is-visible .sell__subtitle,
-.sell.is-visible .sell__cta,
-.sell.is-visible .sell-tile {
-  opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
+  animation: sellCardIn 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.sell.is-visible .sell__kicker {
-  transition-delay: 0ms;
-}
-.sell.is-visible .sell__title {
-  transition-delay: 80ms;
-}
-.sell.is-visible .sell__subtitle {
-  transition-delay: 140ms;
+.sell.is-visible .sell__card::before { opacity: 1; }
+.sell.is-visible .sell__card::after  { animation: sellSheen 900ms ease-out 180ms 1 both; }
+
+.sell.is-visible .sell__kicker  { animation: sellFadeUp 520ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both; }
+.sell.is-visible .sell__title   { animation: sellFadeUp 620ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both; }
+.sell.is-visible .sell__subtitle{ animation: sellFadeUp 620ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both; }
+.sell.is-visible .sell__cta     { animation: sellCtaPop 640ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both; }
+
+/* tiles: postepeno “dock” */
+.sell.is-visible .sell-tile {
+  animation: sellTileDock 540ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--d, 0ms) + 220ms) both;
 }
 
 /* Responsive */
 @media (max-width: 991.98px) {
-  .sell {
-    padding: 82px 0 96px;
-  }
-  .sell__card {
-    padding: 34px 22px;
-  }
-  .sell__grid {
-    margin-top: 18px;
-  }
+  .sell { padding: 82px 0 96px; }
+  .sell__card { padding: 34px 22px; }
+  .sell__grid { margin-top: 18px; }
 }
+
 @media (max-width: 575.98px) {
-  .sell__grid {
-    grid-template-columns: 1fr;
-  }
+  .sell__grid { grid-template-columns: 1fr; }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .sell__card,
-  .sell__kicker,
-  .sell__title,
-  .sell__subtitle,
-  .sell__cta,
-  .sell-tile {
-    transition: none !important;
+  .sell__card, .sell__kicker, .sell__title, .sell__subtitle, .sell__cta, .sell-tile,
+  .sell__card::before, .sell__card::after, .sell__cta::before {
+    animation: none !important;
     opacity: 1 !important;
     transform: none !important;
-    filter: none !important;
   }
 }
+
 
 /* =========================================================
    FOOTER (as in screenshot)
@@ -2287,10 +2456,10 @@ $accent-b: #0b57ff;
    OBAVEZNI DIO – NE MIJENJATI / NE IZOSTAVLJATI
    ========================================================= */
 
-section[id], footer[id] {
+section[id],
+footer[id] {
   scroll-margin-top: 55px; // isti offset kao gore
 }
-
 
 @keyframes backdropFadeIn {
   from {

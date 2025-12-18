@@ -34,21 +34,49 @@
         <div class="collapse navbar-collapse app-navbar__center" id="mainNavbar">
           <ul class="navbar-nav app-navbar__nav mx-lg-auto">
             <li class="nav-item">
-              <a class="nav-link" routerLink="/inventory" routerLinkActive="is-active" (click)="scrollTo('collections')">Inventory</a>
+              <a
+                class="nav-link"
+                routerLink="/inventory"
+                routerLinkActive="is-active"
+                (click)="scrollTo('collections')"
+                >Inventory</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" routerLink="/how-it-works" routerLinkActive="is-active" (click)="scrollTo('how-it-works')"
+              <a
+                class="nav-link"
+                routerLink="/how-it-works"
+                routerLinkActive="is-active"
+                (click)="scrollTo('how-it-works')"
                 >How It Works</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" routerLink="/features" routerLinkActive="is-active" (click)="scrollTo('premium')">Features</a>
+              <a
+                class="nav-link"
+                routerLink="/features"
+                routerLinkActive="is-active"
+                (click)="scrollTo('premium')"
+                >Features</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" routerLink="/sell" routerLinkActive="is-active" (click)="scrollTo('sell-your-car')">Sell Car</a>
+              <a
+                class="nav-link"
+                routerLink="/sell"
+                routerLinkActive="is-active"
+                (click)="scrollTo('sell-your-car')"
+                >Sell Car</a
+              >
             </li>
             <li class="nav-item">
-              <a class="nav-link" routerLink="/contact" routerLinkActive="is-active" (click)="scrollTo('visit-us')">Contact</a>
+              <a
+                class="nav-link"
+                routerLink="/contact"
+                routerLinkActive="is-active"
+                (click)="scrollTo('visit-us')"
+                >Contact</a
+              >
             </li>
             <!-- mobile actions inside collapse -->
             <li class="nav-item d-lg-none mt-2">
@@ -89,7 +117,7 @@
                     (click)="logout()"
                   >
                     <mat-icon>logout</mat-icon>
-                    Odjavi se
+                    Odjava
                   </button>
                 </div>
               </ng-template>
@@ -348,7 +376,12 @@
       </section>
 
       <!-- OUR COLLECTIONS -->
-      <section class="collections" id="collections">
+      <section
+        class="collections"
+        #collectionsSection
+        [class.is-visible]="collectionsVisible"
+        id="collections"
+      >
         <div class="container">
           <div class="collections__head text-center">
             <div class="collections__eyebrow">EXPLORE BY CATEGORY</div>
@@ -359,10 +392,14 @@
           </div>
 
           <div class="row g-4 g-lg-5">
-            <div class="col-12 col-md-6 col-lg-3" *ngFor="let c of collectionCards">
-              <a class="collection-card" [routerLink]="c.link" aria-label="Explore category">
-                <img class="collection-card__img" [src]="c.image" [alt]="c.title" loading="lazy" />
-
+            <div class="col-12 col-md-6 col-lg-3" *ngFor="let c of collectionCards; let i = index">
+              <a
+                class="collection-card"
+                [routerLink]="c.link"
+                aria-label="Explore category"
+                [style.--d]="i * 200 + 'ms'"
+              >
+                <img class="collection-card__img" [src]="c.image" [alt]="c.title" loading="lazy" />s
                 <div class="collection-card__content">
                   <div class="collection-card__count">{{ c.count }}</div>
                   <div class="collection-card__title">{{ c.title }}</div>
@@ -380,7 +417,12 @@
       </section>
 
       <!-- HOW IT WORKS -->
-      <section class="how-works" #howWorksSection [class.is-visible]="howWorksVisible" id="how-it-works">
+      <section
+        class="how-works"
+        #howWorksSection
+        [class.is-visible]="howWorksVisible"
+        id="how-it-works"
+      >
         <div class="container">
           <div class="how-works__head text-center">
             <div class="how-works__kicker">SIMPLE PROCESS</div>
@@ -490,16 +532,26 @@
               <button type="button" class="visit__cta" style="--d: 420ms">Schedule a Visit</button>
             </div>
 
+
             <!-- RIGHT -->
             <div class="col-12 col-lg-7 d-flex align-items-center justify-content-center">
               <div class="visit__mapWrap">
-                <iframe
-                  class="visit__map"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  src="https://www.google.com/maps?q=Eiffel%20Tower&output=embed"
-                  aria-label="Showroom location map"
-                ></iframe>
+                <ng-container *ngIf="visitMapLoaded; else mapPlaceholder">
+                  <iframe
+                    class="visit__map"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://www.google.com/maps?q=Eiffel%20Tower&output=embed"
+                    aria-label="Showroom location map"
+                  ></iframe>
+                </ng-container>
+
+                <ng-template #mapPlaceholder>
+                  <button type="button" class="visit__mapPlaceholder" (click)="loadMapNow()">
+                    <mat-icon>map</mat-icon>
+                    <span>Load map</span>
+                  </button>
+                </ng-template>
               </div>
             </div>
           </div>
@@ -509,15 +561,14 @@
       <!-- SELL YOUR VEHICLE -->
       <section class="sell" #sellSection [class.is-visible]="sellVisible" id="sell-your-car">
         <div class="container">
-          <div class="sell__card">
+          <div class="sell__card" #sellCard>
             <div class="row align-items-center g-4 g-lg-5">
               <!-- LEFT -->
-              <div class="col-12 col-lg-6">
+              <div class="col-12 col-lg-6 sell__left">
                 <div class="sell__kicker">SELL YOUR VEHICLE</div>
 
                 <h2 class="sell__title">
-                  <span>Get Top Dollar for Your</span>
-                  <span>Car</span>
+                  <span>Get Top Dollar for Your Car</span>
                 </h2>
 
                 <p class="sell__subtitle">
@@ -533,30 +584,30 @@
               </div>
 
               <!-- RIGHT -->
-              <div class="col-12 col-lg-6">
+              <div class="col-12 col-lg-6 sell__right">
                 <div class="sell__grid">
-                  <div class="sell-tile" style="--d: 120ms">
+                  <div class="sell-tile" style="--d: 120ms; --tx: -34px; --ty: 18px">
                     <div class="sell-tile__icon">
                       <mat-icon>trending_up</mat-icon>
                     </div>
                     <div class="sell-tile__text">Fair Market Value</div>
                   </div>
 
-                  <div class="sell-tile" style="--d: 220ms">
+                  <div class="sell-tile" style="--d: 220ms; --tx: -34px; --ty: 18px">
                     <div class="sell-tile__icon">
                       <mat-icon>bolt</mat-icon>
                     </div>
                     <div class="sell-tile__text">Quick Process</div>
                   </div>
 
-                  <div class="sell-tile" style="--d: 320ms">
+                  <div class="sell-tile" style="--d: 320ms; --tx: -34px; --ty: 26px">
                     <div class="sell-tile__icon">
                       <mat-icon>shield</mat-icon>
                     </div>
                     <div class="sell-tile__text">Secure Payment</div>
                   </div>
 
-                  <div class="sell-tile" style="--d: 420ms">
+                  <div class="sell-tile" style="--d: 420ms; --tx: -34px; --ty: 26px">
                     <div class="sell-tile__icon">
                       <mat-icon>task_alt</mat-icon>
                     </div>
@@ -697,11 +748,7 @@
   (click)="closeLogoutModal()"
   [class.is-closing]="isLogoutClosing"
 >
-  <div
-    class="login-modal"
-    (click)="$event.stopPropagation()"
-    [class.is-closing]="isLogoutClosing"
-  >
+  <div class="login-modal" (click)="$event.stopPropagation()" [class.is-closing]="isLogoutClosing">
     <app-logout
       [compact]="true"
       [redirectToLogin]="false"
