@@ -1,118 +1,655 @@
 <!-- src/app/layouts/public-layout/public-layout.component.html -->
-
-<div class="public-layout" [class.blurred]="isLoginOpen || isRegisterOpen">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+<div class="public-layout" [class.blurred]="isLoginOpen || isRegisterOpen || isLogoutOpen">
   <div class="landing-page">
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-content">
-        <div class="hero-text">
-          <div class="logo-container">
-            <mat-icon class="logo-icon">storefront</mat-icon>
-            <h1 class="brand-name">FIT Market</h1>
-          </div>
-          <h2 class="hero-title">Moderna platforma za upravljanje marketom</h2>
-          <p class="hero-description">
-            Pojednostavite vaše poslovanje sa našim intuitivnim sistemom za
-            upravljanje proizvodima, kategorijama i zalihama. Sve što vam treba
-            na jednom mjestu.
-          </p>
-          <div class="hero-actions">
-            <!-- ako nije logovan, prikazuj CTA za login -->
+    <!--NAV BAR-->
+    <nav class="navbar app-navbar navbar-expand-lg" [class.is-hidden]="navHidden">
+      <div class="container app-navbar__inner">
+        <!-- BRAND -->
+        <a class="app-navbar__brand" routerLink="/">
+          <span class="brand-icon" aria-hidden="true">
+            <mat-icon>directions_car</mat-icon>
+          </span>
+
+          <span class="brand-text">
+            <span class="brand-title">Autique</span>
+            <span class="brand-subtitle">Gallery</span>
+          </span>
+        </a>
+
+        <!-- TOGGLER (mobile) -->
+        <button
+          class="navbar-toggler app-navbar__toggler d-lg-none"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNavbar"
+          aria-controls="mainNavbar"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- CENTER MENU -->
+        <div class="collapse navbar-collapse app-navbar__center" id="mainNavbar">
+          <ul class="navbar-nav app-navbar__nav mx-lg-auto">
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/inventory" routerLinkActive="is-active" (click)="scrollTo('collections')">Inventory</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/how-it-works" routerLinkActive="is-active" (click)="scrollTo('how-it-works')"
+                >How It Works</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/features" routerLinkActive="is-active" (click)="scrollTo('premium')">Features</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/sell" routerLinkActive="is-active" (click)="scrollTo('sell-your-car')">Sell Car</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/contact" routerLinkActive="is-active" (click)="scrollTo('visit-us')">Contact</a>
+            </li>
+            <!-- mobile actions inside collapse -->
+            <li class="nav-item d-lg-none mt-2">
+              <ng-container *ngIf="!isAuthenticated; else loggedInCta">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  class="nav-auth-button"
+                  (click)="openLoginModal()"
+                >
+                  <mat-icon>login</mat-icon>
+                  LOG IN
+                </button>
+
+                <button mat-stroked-button class="nav-auth-button" (click)="openRegisterModal()">
+                  <mat-icon>person_add</mat-icon>
+                  REGISTER
+                </button>
+              </ng-container>
+
+              <!-- Ako JE logovan: samo LOGOUT -->
+              <ng-template #loggedInCta>
+                <div class="d-flex flex-row gap-2">
+                  <button
+                    *ngIf="isAdmin"
+                    mat-stroked-button
+                    class="nav-auth-button"
+                    routerLink="/admin/dashboard"
+                  >
+                    <mat-icon>admin_panel_settings</mat-icon>
+                    Admin
+                  </button>
+
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    class="nav-auth-button"
+                    (click)="logout()"
+                  >
+                    <mat-icon>logout</mat-icon>
+                    Odjavi se
+                  </button>
+                </div>
+              </ng-template>
+            </li>
+          </ul>
+        </div>
+
+        <!-- RIGHT ACTIONS (desktop) -->
+        <!-- Ako NIJE logovan: prikazuj LOGIN + REGISTER -->
+        <div class="app-navbar__actions d-none d-lg-flex align-items-center gap-2">
+          <!-- Ako NIJE logovan: prikazuj LOGIN + REGISTER -->
+          <ng-container *ngIf="!isAuthenticated; else loggedInCta">
             <button
-              *ngIf="!isAuthenticated; else heroLogout"
               mat-raised-button
               color="primary"
-              class="cta-button"
+              class="nav-auth-button"
               (click)="openLoginModal()"
             >
-              <mat-icon>rocket_launch</mat-icon>
-              Započni sada
+              <mat-icon>login</mat-icon>
+              LOG IN
             </button>
 
-            <ng-template #heroLogout>
+            <button mat-stroked-button class="nav-auth-button" (click)="openRegisterModal()">
+              <mat-icon>person_add</mat-icon>
+              REGISTER
+            </button>
+          </ng-container>
+
+          <!-- Ako JE logovan: samo LOGOUT -->
+          <ng-template #loggedInCta>
+            <div class="d-flex align-items-center gap-2">
               <button
-                mat-raised-button
-                color="primary"
-                class="cta-button"
-                (click)="logout()"
+                *ngIf="isAdmin"
+                mat-stroked-button
+                class="nav-auth-button"
+                routerLink="/admin/dashboard"
               >
+                <mat-icon>admin_panel_settings</mat-icon>
+                Admin
+              </button>
+
+              <button mat-raised-button color="primary" class="nav-auth-button" (click)="logout()">
                 <mat-icon>logout</mat-icon>
                 Odjavi se
               </button>
-            </ng-template>
-
-            <button mat-stroked-button class="secondary-button">
-              <mat-icon>play_circle</mat-icon>
-              Pogledaj demo
-            </button>
-          </div>
-        </div>
-
-        <div class="hero-image">
-          <div class="floating-card card-1">
-            <mat-icon>inventory_2</mat-icon>
-            <span>1,250+ Proizvoda</span>
-          </div>
-          <div class="floating-card card-2">
-            <mat-icon>trending_up</mat-icon>
-            <span>95% Zadovoljstvo</span>
-          </div>
-          <div class="floating-card card-3">
-            <mat-icon>speed</mat-icon>
-            <span>Brzo &amp; Efikasno</span>
-          </div>
+            </div>
+          </ng-template>
         </div>
       </div>
-    </section>
+    </nav>
+    <main class="public-main">
+      <!-- Hero Section -->
+      <section class="hero">
+        <!-- Background video -->
+        <div class="hero__bg" aria-hidden="true">
+          <video #heroVideo class="hero__video" autoplay muted loop playsinline preload="auto">
+            <!-- bitno: bez leading slash radi i kad promijeniš base-href -->
+            <source src="assets/hero_bg_video.mp4" type="video/mp4" />
+          </video>
+        </div>
 
-    <!-- Features Section -->
-    <!-- (ostavi svoj postojeći kod features / stats sekcija) -->
+        <!-- Overlay (tamni sloj + vignette) -->
+        <div class="hero__overlay" aria-hidden="true"></div>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-      <div class="cta-content">
-        <h2>Spremni da počnete?</h2>
-        <p>
-          Pridružite se stotinama zadovoljnih korisnika koji su već unaprijedili
-          svoje poslovanje
-        </p>
+        <div class="container hero__container">
+          <div class="row g-4 g-lg-5 align-items-start">
+            <!-- LEFT -->
+            <div class="col-12 col-lg-6">
+              <div class="hero-card hero-card--left">
+                <div class="hero-badge">
+                  <mat-icon>auto_awesome</mat-icon>
+                  <span>Luxury Redefined</span>
+                </div>
 
-        <!-- Ako NIJE logovan: prikazuj LOGIN + REGISTER -->
-        <ng-container *ngIf="!isAuthenticated; else loggedInCta">
-          <button
-            mat-raised-button
-            color="primary"
-            class="cta-large-button"
-            (click)="openLoginModal()"
-          >
-            <mat-icon>login</mat-icon>
-            Prijavite se sada
-          </button>
+                <h1 class="hero-title">
+                  <span class="hero-title__line">Discover Your</span>
+                  <span class="hero-title__accent">Perfect Ride</span>
+                </h1>
 
-          <button
-            mat-stroked-button
-            class="cta-large-button cta-secondary"
-            (click)="openRegisterModal()"
-          >
-            <mat-icon>person_add</mat-icon>
-            Kreiraj nalog
-          </button>
-        </ng-container>
+                <p class="hero-subtitle">
+                  Browse our curated collection of premium vehicles. From luxury sedans to
+                  high-performance sports cars.
+                </p>
 
-        <!-- Ako JE logovan: samo LOGOUT -->
-        <ng-template #loggedInCta>
-          <button
-            mat-raised-button
-            color="primary"
-            class="cta-large-button"
-            (click)="logout()"
-          >
-            <mat-icon>logout</mat-icon>
-            Odjavi se
-          </button>
-        </ng-template>
-      </div>
-    </section>
+                <div class="hero-cta d-flex flex-wrap gap-3">
+                  <button type="button" class="btn btn-hero-primary">
+                    Explore Collection
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+
+                  <button type="button" class="btn btn-hero-secondary">Schedule Visit</button>
+                </div>
+
+                <div class="row g-3 hero-stats">
+                  <div class="col-12 col-sm-4">
+                    <div class="stat-card">
+                      <div class="stat-num">500+</div>
+                      <div class="stat-label">Premium Cars</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-4">
+                    <div class="stat-card">
+                      <div class="stat-num">98%</div>
+                      <div class="stat-label">Satisfaction</div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-4">
+                    <div class="stat-card">
+                      <div class="stat-num">15+</div>
+                      <div class="stat-label">Years Service</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="hero-divider"></div>
+
+                <div class="hero-why">
+                  <div class="hero-why__title">Why Choose Us</div>
+
+                  <ul class="hero-why__list">
+                    <li>
+                      <span class="why-icon">
+                        <mat-icon>verified_user</mat-icon>
+                      </span>
+                      <span>Certified Quality Vehicles</span>
+                    </li>
+
+                    <li>
+                      <span class="why-icon">
+                        <mat-icon>local_offer</mat-icon>
+                      </span>
+                      <span>Best Price Guarantee</span>
+                    </li>
+
+                    <li>
+                      <span class="why-icon">
+                        <mat-icon>support_agent</mat-icon>
+                      </span>
+                      <span>24/7 Expert Support</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-12 col-lg-6">
+              <!-- Search Card -->
+              <div class="hero-card hero-card--search">
+                <div class="search-head">
+                  <div>
+                    <div class="search-title">Find Your Dream Car</div>
+                    <div class="search-subtitle">Search premium collection</div>
+                  </div>
+
+                  <button type="button" class="icon-btn" aria-label="Search">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                </div>
+
+                <div class="row g-3 mt-2">
+                  <div class="col-12 col-md-4">
+                    <label class="hero-label">Make</label>
+                    <select class="form-select hero-select">
+                      <option selected>All Makes</option>
+                      <option>Audi</option>
+                      <option>BMW</option>
+                      <option>Mercedes</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <label class="hero-label">Model</label>
+                    <select class="form-select hero-select">
+                      <option selected>All Models</option>
+                      <option>A4</option>
+                      <option>3 Series</option>
+                      <option>C-Class</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <label class="hero-label">Year</label>
+                    <select class="form-select hero-select">
+                      <option selected>All Years</option>
+                      <option>2025</option>
+                      <option>2024</option>
+                      <option>2023</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button type="button" class="btn btn-hero-primary btn-hero-wide mt-3">
+                  <mat-icon>search</mat-icon>
+                  Search Vehicles
+                  <mat-icon class="ms-1">arrow_forward</mat-icon>
+                </button>
+              </div>
+
+              <!-- Featured Vehicle -->
+              <div class="hero-card hero-card--vehicle mt-4">
+                <div class="vehicle-media">
+                  <img src="assets/porsche.jpg" alt="Featured vehicle" />
+                  <span class="vehicle-badge">Featured</span>
+                </div>
+
+                <div class="vehicle-body">
+                  <div class="vehicle-title">2024 Porsche 911 Turbo S</div>
+                  <div class="vehicle-specs">640 HP • 2.6s 0-60 mph • AWD</div>
+
+                  <div class="vehicle-footer">
+                    <div class="vehicle-price">$230,000</div>
+
+                    <a class="vehicle-link" href="javascript:void(0)">
+                      View Details
+                      <mat-icon>arrow_forward</mat-icon>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Trust / Rating -->
+              <div class="row g-3 mt-4">
+                <div class="col-12 col-md-6">
+                  <div class="mini-badge">
+                    <span class="mini-icon mini-icon--green">
+                      <mat-icon>check_circle</mat-icon>
+                    </span>
+
+                    <div class="mini-text">
+                      <div class="mini-title">Trusted Dealer</div>
+                      <div class="mini-sub">Licensed &amp; Verified</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="mini-badge">
+                    <span class="mini-icon mini-icon--gold">
+                      <mat-icon>star</mat-icon>
+                    </span>
+
+                    <div class="mini-text">
+                      <div class="mini-title">4.9 Rating</div>
+                      <div class="mini-sub">2,500+ Reviews</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /RIGHT -->
+          </div>
+        </div>
+      </section>
+
+      <!-- OUR COLLECTIONS -->
+      <section class="collections" id="collections">
+        <div class="container">
+          <div class="collections__head text-center">
+            <div class="collections__eyebrow">EXPLORE BY CATEGORY</div>
+            <h2 class="collections__title">Our Collections</h2>
+            <p class="collections__subtitle">
+              Find your perfect match from our diverse range of premium vehicles
+            </p>
+          </div>
+
+          <div class="row g-4 g-lg-5">
+            <div class="col-12 col-md-6 col-lg-3" *ngFor="let c of collectionCards">
+              <a class="collection-card" [routerLink]="c.link" aria-label="Explore category">
+                <img class="collection-card__img" [src]="c.image" [alt]="c.title" loading="lazy" />
+
+                <div class="collection-card__content">
+                  <div class="collection-card__count">{{ c.count }}</div>
+                  <div class="collection-card__title">{{ c.title }}</div>
+                  <div class="collection-card__desc">{{ c.desc }}</div>
+
+                  <div class="collection-card__cta">
+                    <span>Explore</span>
+                    <mat-icon>arrow_forward</mat-icon>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="how-works" #howWorksSection [class.is-visible]="howWorksVisible" id="how-it-works">
+        <div class="container">
+          <div class="how-works__head text-center">
+            <div class="how-works__kicker">SIMPLE PROCESS</div>
+            <h2 class="how-works__title">How It Works</h2>
+            <p class="how-works__subtitle">
+              Your journey to owning a premium vehicle in just 4 easy steps
+            </p>
+          </div>
+
+          <div class="how-works__grid position-relative">
+            <!-- sweep line -->
+            <div class="how-works__sweep" aria-hidden="true"></div>
+
+            <div class="row g-4 justify-content-center">
+              <div class="col-12 col-md-6 col-lg-3" *ngFor="let s of howSteps; let i = index">
+                <div class="how-step" [style.--d]="i * 140 + 'ms'">
+                  <div class="how-step__icon-wrap">
+                    <div class="how-step__tile">
+                      <mat-icon>{{ s.icon }}</mat-icon>
+                    </div>
+
+                    <div class="how-step__badge">
+                      <span>{{ s.no }}</span>
+                    </div>
+                  </div>
+
+                  <h3 class="how-step__title">{{ s.title }}</h3>
+                  <p class="how-step__desc">{{ s.desc }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PREMIUM EXPERIENCE -->
+      <section class="premium-exp" #premiumSection [class.is-visible]="premiumVisible" id="premium">
+        <div class="container">
+          <div class="premium-exp__head text-center">
+            <div class="premium-exp__kicker">WHY CHOOSE US</div>
+            <h2 class="premium-exp__title">Premium Experience</h2>
+            <p class="premium-exp__subtitle">
+              We deliver excellence in every aspect of your luxury car buying journey
+            </p>
+          </div>
+
+          <div class="row g-4 g-lg-5 justify-content-center premium-exp__grid">
+            <div class="col-12 col-md-6 col-lg-3" *ngFor="let f of premiumFeatures; let i = index">
+              <div class="premium-card" [style.--d]="i * 120 + 'ms'">
+                <div
+                  class="premium-card__icon"
+                  [style.background]="f.iconBg"
+                  [style.boxShadow]="'0 18px 44px ' + f.iconGlow"
+                >
+                  <mat-icon>{{ f.icon }}</mat-icon>
+                </div>
+
+                <h3 class="premium-card__title">{{ f.title }}</h3>
+                <p class="premium-card__desc">{{ f.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISIT US / SHOWROOM -->
+      <section class="visit" #visitSection [class.is-visible]="visitVisible" id="visit-us">
+        <div class="container">
+          <div class="row align-items-center g-5">
+            <!-- LEFT -->
+            <div class="col-12 col-lg-5">
+              <div class="visit__kicker">VISIT US</div>
+
+              <h2 class="visit__title">
+                <span>Experience Our</span>
+                <span>Showroom</span>
+              </h2>
+
+              <p class="visit__subtitle">
+                Step into our state-of-the-art showroom and explore our premium collection in
+                person. Our expert team is ready to guide you through every detail.
+              </p>
+
+              <div class="visit__list">
+                <div class="visit__item" style="--d: 120ms">
+                  <div class="visit__icon">
+                    <mat-icon>location_on</mat-icon>
+                  </div>
+                  <div class="visit__text">123 Luxury Ave, Premium District</div>
+                </div>
+
+                <div class="visit__item" style="--d: 220ms">
+                  <div class="visit__icon">
+                    <mat-icon>schedule</mat-icon>
+                  </div>
+                  <div class="visit__text">Mon-Sat: 9AM-8PM, Sun: 10AM-6PM</div>
+                </div>
+
+                <div class="visit__item" style="--d: 320ms">
+                  <div class="visit__icon">
+                    <mat-icon>call</mat-icon>
+                  </div>
+                  <div class="visit__text">(555) 123-4567</div>
+                </div>
+              </div>
+
+              <button type="button" class="visit__cta" style="--d: 420ms">Schedule a Visit</button>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-12 col-lg-7 d-flex align-items-center justify-content-center">
+              <div class="visit__mapWrap">
+                <iframe
+                  class="visit__map"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  src="https://www.google.com/maps?q=Eiffel%20Tower&output=embed"
+                  aria-label="Showroom location map"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SELL YOUR VEHICLE -->
+      <section class="sell" #sellSection [class.is-visible]="sellVisible" id="sell-your-car">
+        <div class="container">
+          <div class="sell__card">
+            <div class="row align-items-center g-4 g-lg-5">
+              <!-- LEFT -->
+              <div class="col-12 col-lg-6">
+                <div class="sell__kicker">SELL YOUR VEHICLE</div>
+
+                <h2 class="sell__title">
+                  <span>Get Top Dollar for Your</span>
+                  <span>Car</span>
+                </h2>
+
+                <p class="sell__subtitle">
+                  We offer competitive prices and a hassle-free selling process. Get your vehicle
+                  evaluated today.
+                </p>
+
+                <button type="button" class="sell__cta">
+                  <span class="sell__ctaIcon">$</span>
+                  <span>Start Selling Now</span>
+                  <mat-icon class="sell__ctaArrow">arrow_forward</mat-icon>
+                </button>
+              </div>
+
+              <!-- RIGHT -->
+              <div class="col-12 col-lg-6">
+                <div class="sell__grid">
+                  <div class="sell-tile" style="--d: 120ms">
+                    <div class="sell-tile__icon">
+                      <mat-icon>trending_up</mat-icon>
+                    </div>
+                    <div class="sell-tile__text">Fair Market Value</div>
+                  </div>
+
+                  <div class="sell-tile" style="--d: 220ms">
+                    <div class="sell-tile__icon">
+                      <mat-icon>bolt</mat-icon>
+                    </div>
+                    <div class="sell-tile__text">Quick Process</div>
+                  </div>
+
+                  <div class="sell-tile" style="--d: 320ms">
+                    <div class="sell-tile__icon">
+                      <mat-icon>shield</mat-icon>
+                    </div>
+                    <div class="sell-tile__text">Secure Payment</div>
+                  </div>
+
+                  <div class="sell-tile" style="--d: 420ms">
+                    <div class="sell-tile__icon">
+                      <mat-icon>task_alt</mat-icon>
+                    </div>
+                    <div class="sell-tile__text">No Hidden Fees</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /sell__card -->
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <div class="container">
+          <div class="footer-top">
+            <!-- LEFT -->
+            <div class="footer-brand">
+              <div class="footer-brand__head">
+                <div class="footer-brand__logo">
+                  <mat-icon>directions_car</mat-icon>
+                </div>
+                <div class="footer-brand__name">Premium Dealership</div>
+              </div>
+
+              <p class="footer-brand__desc">
+                Your trusted partner in finding the perfect vehicle. Premium quality, exceptional
+                service, transparent pricing.
+              </p>
+
+              <div class="footer-contact">
+                <div class="footer-contact__item">
+                  <mat-icon>call</mat-icon>
+                  <span>+1 (555) 123-4567</span>
+                </div>
+                <div class="footer-contact__item">
+                  <mat-icon>mail_outline</mat-icon>
+                  <span>info@dealership.com</span>
+                </div>
+                <div class="footer-contact__item">
+                  <mat-icon>location_on</mat-icon>
+                  <span>123 Auto Street, City, ST 12345</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- MIDDLE -->
+            <div class="footer-links">
+              <h4 class="footer-title">Quick Links</h4>
+              <a class="footer-link" routerLink="/inventory">Browse Vehicles</a>
+              <a class="footer-link" routerLink="/rent">Rent a Car</a>
+              <a class="footer-link" routerLink="/sell">Sell Your Car</a>
+              <a class="footer-link" routerLink="/about">About Us</a>
+              <a class="footer-link" routerLink="/contact">Contact</a>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="footer-news">
+              <h4 class="footer-title">Stay Updated</h4>
+              <p class="footer-news__desc">Subscribe for exclusive deals and updates.</p>
+
+              <div class="footer-form">
+                <input class="footer-input" type="email" placeholder="Enter your email" />
+                <button class="footer-btn" type="button">
+                  <span>Subscribe</span>
+                  <mat-icon>send</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-divider"></div>
+
+          <div class="footer-bottom">
+            <div class="footer-copy">© 2025 Premium Dealership. All rights reserved.</div>
+
+            <div class="footer-social">
+              <a class="social-btn" href="#" aria-label="Facebook"><mat-icon>facebook</mat-icon></a>
+              <a class="social-btn" href="#" aria-label="Twitter"><mat-icon>twitter</mat-icon></a>
+              <a class="social-btn" href="#" aria-label="Instagram"
+                ><mat-icon>instagram</mat-icon></a
+              >
+              <a class="social-btn" href="#" aria-label="LinkedIn"><mat-icon>linkedin</mat-icon></a>
+            </div>
+
+            <div class="footer-legal">
+              <a class="footer-legal__link" routerLink="/privacy">Privacy Policy</a>
+              <a class="footer-legal__link" routerLink="/terms">Terms of Service</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
   </div>
 </div>
 
@@ -123,11 +660,7 @@
   (click)="closeLoginModal()"
   [class.is-closing]="isLoginClosing"
 >
-  <div
-    class="login-modal"
-    (click)="$event.stopPropagation()"
-    [class.is-closing]="isLoginClosing"
-  >
+  <div class="login-modal" (click)="$event.stopPropagation()" [class.is-closing]="isLoginClosing">
     <app-login
       [compact]="true"
       [openRegisterViaRouter]="false"
@@ -155,5 +688,24 @@
       (closed)="closeRegisterModal()"
       (signIn)="handleSignInFromRegister()"
     ></app-register>
+  </div>
+</div>
+<!-- LOGOUT POPUP -->
+<div
+  class="login-backdrop"
+  *ngIf="isLogoutOpen"
+  (click)="closeLogoutModal()"
+  [class.is-closing]="isLogoutClosing"
+>
+  <div
+    class="login-modal"
+    (click)="$event.stopPropagation()"
+    [class.is-closing]="isLogoutClosing"
+  >
+    <app-logout
+      [compact]="true"
+      [redirectToLogin]="false"
+      (completed)="handleLogoutCompleted()"
+    ></app-logout>
   </div>
 </div>
