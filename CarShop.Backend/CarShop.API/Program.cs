@@ -82,6 +82,8 @@ public partial class Program
 
             app.UseHttpsRedirection();
 
+            app.UseStaticFiles();
+
             // IMPORTANT: CORS goes before auth/authorization and before MapControllers
             app.UseCors(CorsPolicyName);
 

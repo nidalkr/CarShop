@@ -15,8 +15,9 @@ namespace CarShop.Application.Modules.Cars.Dtos
         public decimal Price { get; init; }
         public decimal? DiscountedPrice { get; init; }
         public int Mileage { get; init; }
-        public string BodyStyle { get; init; } = string.Empty;
+        public int HorsePower { get; init; }
         public string Transmission { get; init; } = string.Empty;
         public string FuelType { get; init; } = string.Empty;
+        public string? PrimaryImageUrl { get; init; }
     }
 }

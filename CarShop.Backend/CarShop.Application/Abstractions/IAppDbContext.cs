@@ -13,6 +13,9 @@ public interface IAppDbContext
     DbSet<BrandEntity> Brands { get; }
     DbSet<CategoryEntity> Categories { get; }
     DbSet<CarEntity> Cars { get; }
+    DbSet<CarImageEntity> CarImages { get; }
+    DbSet<CarFeatureEntity> CarFeatures { get; }
+
 
     DbSet<ReviewEntity> Reviews { get; }
     DbSet<InquiryEntity> Inquiries { get; }

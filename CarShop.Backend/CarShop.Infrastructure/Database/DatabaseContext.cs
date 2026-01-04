@@ -14,6 +14,9 @@ public partial class DatabaseContext : DbContext, IAppDbContext
     public DbSet<BrandEntity> Brands => Set<BrandEntity>();
     public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
     public DbSet<CarEntity> Cars => Set<CarEntity>();
+    public DbSet<CarImageEntity> CarImages => Set<CarImageEntity>();
+    public DbSet<CarFeatureEntity> CarFeatures => Set<CarFeatureEntity>();
+
 
     //Commerce
     public DbSet<ReviewEntity> Reviews => Set<ReviewEntity>();

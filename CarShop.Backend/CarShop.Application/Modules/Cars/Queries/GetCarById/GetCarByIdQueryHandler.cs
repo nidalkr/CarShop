@@ -12,6 +12,8 @@ public sealed class GetCarByIdQueryHandler(IAppDbContext ctx)
             .Include(x => x.Brand)
             .Include(x => x.Category)
             .Include(x => x.CarStatus)
+            .Include(x => x.Images)            
+            .Include(x => x.Features)
             .FirstOrDefaultAsync(x => x.Id == request.Id && !x.IsDeleted, ct)
             ?? throw new CarShopNotFoundException("Vozilo nije pronađeno.");
 

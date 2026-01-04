@@ -1,13 +1,29 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { finalize } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+// paginator uses plain vm object
 
-import { FitConfirmDialogComponent } from '../../shared/components/fit-confirm-dialog/fit-confirm-dialog.component'; 
+import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
+import { BasePagedQuery } from '../../../core/models/paging/base-paged-query';
+
+import { FitConfirmDialogComponent } from '../../shared/components/fit-confirm-dialog/fit-confirm-dialog.component';
 import {
   DialogButton,
   DialogConfig,
   DialogType,
   DialogResult
 } from '../../shared/models/dialog-config.model';
+
+import { CarsApiService } from '../../../api-services/cars/cars-api.service';
+import { CarDetailsDto, CreateCarRequest, UpdateCarRequest } from '../../../api-services/cars/cars-api.model';
+import { BrandsApiService } from '../../../api-services/brands/brands-api.service';
+import { CategoriesApiService } from '../../../api-services/categories/categories-api.service';
+import { StatusesApiService } from '../../../api-services/statuses/statuses-api.service';
+import { LookupItemDto as BrandDto } from '../../../api-services/brands/brands-api.model';
+import { LookupItemDto as CategoryDto } from '../../../api-services/categories/categories-api.model';
+import { StatusLookupDto } from '../../../api-services/statuses/statuses-api.model';
 
 type VehicleStatus = 'In Stock' | 'Limited' | 'Sold';
 type VehicleCondition = 'New' | 'Used';
@@ -18,53 +34,83 @@ interface Vehicle {
   model: string;
   year: number;
   condition: VehicleCondition;
-  bodyType: string;
   fuelType: string;
   transmission: string;
   hp: number;
   miles: number;
   price: number;
   status: VehicleStatus;
-  imageUrl: string;
 
-  // extra fields for modal (optional)
+  imageUrl: string;
+  images: string[];
+
   engine?: string;
   drivetrain?: string;
   mpg?: string;
   seating?: number;
+  doors?: number;
+
+  stockNumber?: string;
+  inventoryLocation?: string;
+  quantityInStock?: number;
+  msrp?: number | null;
+
   exteriorColor?: string;
   interiorColor?: string;
   description?: string;
   features?: string[];
+
+  _raw?: CarDetailsDto;
 }
 
 interface NewVehicleForm {
+  brandId: number;
+  categoryId: number;
+  carStatusId: number;
+
+  vin: string;
+  stockNumber: string;
+  inventoryLocation: string;
+  doors: number;
+  quantityInStock: number;
+
   make: string;
   model: string;
   year: number;
   price: number;
 
-  // step 2
   engine: string;
   hp: number;
   transmission: string;
   drivetrain: string;
   fuelType: string;
   mpg: string;
-
-  // step 3
-  bodyType: string;
   miles: number;
   condition: VehicleCondition;
   seating: number;
   exteriorColor: string;
   interiorColor: string;
 
-  // step 4
-  features: string; // comma separated in wizard
+  features: string;
   description: string;
   status: VehicleStatus;
   images: File[];
+}
+
+class InventoryPaginatorAdapter extends BaseListPagedComponent<Vehicle, BasePagedQuery> {
+  constructor(private cmp: AdminInventoryManagementComponent) {
+    super();
+    this.request = new BasePagedQuery();
+    this.request.paging.page = cmp.page;
+    this.request.paging.pageSize = cmp.pageSize;
+    this.totalItems = cmp.totalCount;
+    this.totalPages = cmp.totalPages;
+  }
+  protected loadPagedData(): void {
+    this.cmp.page = this.request.paging.page;
+    this.cmp.pageSize = this.request.paging.pageSize;
+    this.cmp.loadCars();
+  }
 }
 
 @Component({
@@ -74,118 +120,64 @@ interface NewVehicleForm {
   styleUrls: ['./admin-inventory-management.component.scss'],
 })
 export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
-  constructor(private dialog: MatDialog) {}
+  constructor(
+    private dialog: MatDialog,
+    private carsApi: CarsApiService,
+    private brandsApi: BrandsApiService,
+    private categoriesApi: CategoriesApiService,
+    private statusesApi: StatusesApiService
+  ) {}
 
-  // filters / search
+  isLoading = false;
+  isViewLoading = false;
+  loadError: string | null = null;
+  viewError: string | null = null;
+
   query = '';
   selectedMake: string = 'all';
-  selectedBodyType: string = 'all';
   selectedFuelType: string = 'all';
   selectedCondition: string = 'all';
 
-  // options
   makeOptions: string[] = [];
-  bodyTypeOptions: string[] = [];
   fuelTypeOptions: string[] = [];
   conditionOptions: VehicleCondition[] = ['New', 'Used'];
 
-  // wizard state
-  showAddWizard = false;
-  wizardStep = 1;
+  vehicles: Vehicle[] = [];
+  filteredVehicles: Vehicle[] = [];
+  page = 1;
+  pageSize = 10;
+  totalCount = 0;
+  totalPages = 0;
 
-  // Edit wizard state
-  isEditMode = false;
-  editingVehicleId: number | null = null;
+  paginatorVm: InventoryPaginatorAdapter = new InventoryPaginatorAdapter(this);
 
-  // view modal state
   showViewModal = false;
   selectedVehicle: Vehicle | null = null;
-
-  // data
-  vehicles: Vehicle[] = [
-    {
-      id: 1,
-      make: 'BMW',
-      model: 'M3',
-      year: 2024,
-      condition: 'New',
-      bodyType: 'Sedan',
-      fuelType: 'Gasoline',
-      transmission: 'Automatic',
-      hp: 503,
-      miles: 12,
-      price: 75990,
-      status: 'In Stock',
-      imageUrl: 'assets/cars/demo-1.jpg',
-      engine: '3.0L Twin-Turbo I6',
-      drivetrain: 'RWD',
-      mpg: '16/23 MPG',
-      seating: 5,
-      exteriorColor: 'M Competition Blue',
-      interiorColor: 'Merino Leather Black',
-      description: 'Ultimate driving machine with track-proven performance.',
-      features: ['M Sport Package', 'Carbon Fiber Trim', 'Harman Kardon Sound'],
-    },
-    {
-      id: 2,
-      make: 'Tesla',
-      model: 'Model 3',
-      year: 2024,
-      condition: 'New',
-      bodyType: 'Sedan',
-      fuelType: 'Electric',
-      transmission: 'Automatic',
-      hp: 346,
-      miles: 5,
-      price: 42990,
-      status: 'In Stock',
-      imageUrl: 'assets/cars/demo-2.jpg',
-      engine: 'Dual Motor (Electric)',
-      drivetrain: 'AWD',
-      mpg: '120/112 MPGe',
-      seating: 5,
-      exteriorColor: 'Pearl White Multi-Coat',
-      interiorColor: 'Black',
-      description: 'Fast, efficient, and minimalistic interior with great tech.',
-      features: ['Autopilot', 'Glass Roof', 'Premium Audio'],
-    },
-    {
-      id: 3,
-      make: 'Mercedes-Benz',
-      model: 'S-Class',
-      year: 2024,
-      condition: 'New',
-      bodyType: 'Sedan',
-      fuelType: 'Gasoline',
-      transmission: 'Automatic',
-      hp: 429,
-      miles: 8,
-      price: 118900,
-      status: 'Limited',
-      imageUrl: 'assets/cars/demo-3.jpg',
-      engine: '3.0L Turbo I6 + EQ Boost',
-      drivetrain: 'AWD',
-      mpg: '20/28 MPG',
-      seating: 5,
-      exteriorColor: 'Obsidian Black',
-      interiorColor: 'Nappa Leather Macchiato Beige',
-      description: 'Flagship luxury sedan with cutting-edge comfort and tech.',
-      features: ['Burmester Audio', 'Air Suspension', 'Massaging Seats'],
-    },
-  ];
-
-  filteredVehicles: Vehicle[] = [];
-
-  // form model
-  newVehicle: NewVehicleForm = this.createEmptyForm();
 
   private onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && this.showViewModal) this.closeViewModal();
   };
 
+  showAddWizard = false;
+  wizardStep = 1;
+
+  isEditMode = false;
+  editingVehicleId: number | null = null;
+  editingPrimaryImageUrl: string | null = null;
+  editingGalleryUrls: string[] = [];
+
+  formErrors: string[] = [];
+  primaryUploadIndex = 0;
+
+  brandOptions: BrandDto[] = [];
+  categoryOptions: CategoryDto[] = [];
+  carStatusOptions: StatusLookupDto[] = [];
+
+  newVehicle: NewVehicleForm = this.createEmptyForm();
+
   ngOnInit(): void {
-    this.rebuildFilterOptions();
-    this.applyFilters();
+    this.loadLookups();
+    this.loadCars();
     window.addEventListener('keydown', this.onKeyDown);
   }
 
@@ -194,9 +186,62 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
     document.body.classList.remove('inv-modal-open');
   }
 
-  // -----------------------------
-  // Filters
-  // -----------------------------
+  private loadLookups(): void {
+    forkJoin({
+      brands: this.brandsApi.list(),
+      categories: this.categoriesApi.list(),
+      statuses: this.statusesApi.list()
+    }).subscribe({
+      next: res => {
+        this.brandOptions = res.brands;
+        this.categoryOptions = res.categories;
+        this.carStatusOptions = res.statuses;
+
+        if (!this.newVehicle.brandId && this.brandOptions.length) {
+          this.newVehicle.brandId = this.brandOptions[0].id;
+        }
+        if (!this.newVehicle.categoryId && this.categoryOptions.length) {
+          this.newVehicle.categoryId = this.categoryOptions[0].id;
+        }
+        if (!this.newVehicle.carStatusId && this.carStatusOptions.length) {
+          this.newVehicle.carStatusId = this.carStatusOptions[0].id;
+        }
+      },
+      error: err => console.error('Lookup load failed', err)
+    });
+  }
+
+  loadCars(): void {
+    this.isLoading = true;
+    this.loadError = null;
+    this.paginatorVm.isLoading = true;
+
+    this.carsApi.getAll(this.page, this.pageSize)
+      .pipe(finalize(() => {
+        this.isLoading = false;
+        this.syncPaginatorVm();
+      }))
+      .subscribe({
+        next: (res: any) => {
+          const items = Array.isArray(res?.items) ? res.items : [];
+          this.totalCount = Number(res?.totalCount) || items.length;
+          this.pageSize = Number(res?.pageSize) || this.pageSize;
+          this.page = Number(res?.page) || this.page;
+          this.totalPages = Math.max(1, Math.ceil((this.totalCount || 0) / (this.pageSize || 1)));
+          this.vehicles = items.map((x: any) => this.mapListItemToVehicle(x));
+          this.rebuildFilterOptions();
+          this.applyFilters();
+        },
+        error: err => {
+          console.error(err);
+          this.loadError = 'Failed to load vehicles.';
+          this.vehicles = [];
+          this.filteredVehicles = [];
+          this.rebuildFilterOptions();
+        }
+      });
+  }
+
   applyFilters(): void {
     const q = this.query.trim().toLowerCase();
 
@@ -204,43 +249,165 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
       const matchesQuery =
         !q || `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(q);
 
-      const matchesMake = this.selectedMake === 'all' || v.make === this.selectedMake;
-      const matchesBody = this.selectedBodyType === 'all' || v.bodyType === this.selectedBodyType;
-      const matchesFuel = this.selectedFuelType === 'all' || v.fuelType === this.selectedFuelType;
+      const matchesMake =
+        this.selectedMake === 'all' || v.make === this.selectedMake;
+
+      const matchesFuel =
+        this.selectedFuelType === 'all' || v.fuelType === this.selectedFuelType;
 
       const matchesCond =
         this.selectedCondition === 'all' ||
         v.condition === (this.selectedCondition as VehicleCondition);
 
-      return matchesQuery && matchesMake && matchesBody && matchesFuel && matchesCond;
+      return matchesQuery && matchesMake && matchesFuel && matchesCond;
     });
   }
 
   resetFilters(): void {
     this.query = '';
     this.selectedMake = 'all';
-    this.selectedBodyType = 'all';
     this.selectedFuelType = 'all';
     this.selectedCondition = 'all';
     this.applyFilters();
   }
 
+  goToPage(p: number): void {
+    if (p < 1) return;
+    this.page = p;
+    this.loadCars();
+  }
+
+  changePageSize(size: number): void {
+    if (size <= 0) return;
+    this.pageSize = size;
+    this.page = 1;
+    this.loadCars();
+  }
+
   private rebuildFilterOptions(): void {
-    this.makeOptions = this.unique(this.vehicles.map((x) => x.make));
-    this.bodyTypeOptions = this.unique(this.vehicles.map((x) => x.bodyType));
-    this.fuelTypeOptions = this.unique(this.vehicles.map((x) => x.fuelType));
+    this.makeOptions = this.unique(this.vehicles.map((x) => x.make).filter(Boolean));
+    this.fuelTypeOptions = this.unique(this.vehicles.map((x) => x.fuelType).filter(Boolean));
   }
 
   private unique(arr: string[]): string[] {
     return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b));
   }
 
-  // -----------------------------
-  // Wizard (Add)
-  // -----------------------------
+  viewVehicle(v: Vehicle): void {
+    this.resetCarouselIndex();
+    this.showViewModal = true;
+    this.isViewLoading = true;
+    this.viewError = null;
+    document.body.classList.add('inv-modal-open');
+
+    this.carsApi.getById(v.id)
+      .pipe(finalize(() => (this.isViewLoading = false)))
+      .subscribe({
+        next: dto => {
+          const full = this.mapDetailsDtoToVehicle(dto);
+          full.make = (dto as any).brandName ?? v.make ?? 'Г?"';
+          this.selectedVehicle = full;
+        },
+        error: err => {
+          console.error(err);
+          this.viewError = 'Failed to load vehicle details';
+          this.selectedVehicle = v;
+        }
+      });
+  }
+
+  closeViewModal(): void {
+    this.showViewModal = false;
+    this.selectedVehicle = null;
+    this.viewError = null;
+    this.isViewLoading = false;
+    document.body.classList.remove('inv-modal-open');
+  }
+
+  setStatus(v: Vehicle, status: VehicleStatus): void {
+    v.status = status;
+    this.applyFilters();
+  }
+
+  badgeClass(status: VehicleStatus): string {
+    return status === 'In Stock' ? 'ok' : status === 'Limited' ? 'warn' : 'bad';
+  }
+
+  confirmDeleteVehicle(v: Vehicle): void {
+    const dialogRef = this.dialog.open(FitConfirmDialogComponent, {
+      width: '420px',
+      disableClose: true,
+      data: <DialogConfig>{
+        type: DialogType.WARNING,
+        title: 'Delete vehicle',
+        message: 'Are you sure you want to delete this vehicle?\nThis action cannot be undone.',
+        buttons: [
+          { type: DialogButton.CANCEL, label: 'No, cancel' },
+          { type: DialogButton.DELETE, label: 'Yes, delete' }
+        ]
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: DialogResult) => {
+      if (!result) return;
+      if (result.button === DialogButton.DELETE) {
+        this.deleteVehicle(v);
+      }
+    });
+  }
+
+  private deleteVehicle(v: Vehicle): void {
+    const api: any = this.carsApi as any;
+    const hasDelete = api && typeof api.delete === 'function';
+
+    if (!hasDelete) {
+      this.vehicles = this.vehicles.filter((x) => x.id !== v.id);
+      this.rebuildFilterOptions();
+      this.applyFilters();
+
+      if (this.selectedVehicle?.id === v.id) this.closeViewModal();
+      if (this.editingVehicleId === v.id) this.closeWizard();
+      return;
+    }
+
+    this.isLoading = true;
+    api.delete(v.id)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: () => {
+          this.showSuccessDialog('Vehicle deleted', 'The vehicle has been removed from inventory.');
+          this.loadCars();
+          if (this.selectedVehicle?.id === v.id) this.closeViewModal();
+          if (this.editingVehicleId === v.id) this.closeWizard();
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.loadError = 'Failed to delete vehicle.';
+          // ensure UI matches backend if delete failed
+          this.loadCars();
+        }
+      });
+  }
+
+  private showSuccessDialog(title: string, message: string): void {
+    this.dialog.open(FitConfirmDialogComponent, {
+      width: '420px',
+      data: <DialogConfig>{
+        type: DialogType.SUCCESS,
+        title,
+        message,
+        buttons: [{ type: DialogButton.OK }]
+      }
+    });
+  }
+
   addVehicle(): void {
     this.isEditMode = false;
     this.editingVehicleId = null;
+    this.editingPrimaryImageUrl = null;
+    this.editingGalleryUrls = [];
+    this.formErrors = [];
+    this.primaryUploadIndex = 0;
 
     this.showAddWizard = true;
     this.wizardStep = 1;
@@ -251,39 +418,66 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
-  // Wizard (Edit)
   editVehicle(v: Vehicle): void {
     this.isEditMode = true;
     this.editingVehicleId = v.id;
+    this.editingPrimaryImageUrl = v.imageUrl || null;
+    this.editingGalleryUrls = (v.images ?? []).slice(1);
+    this.formErrors = [];
+    this.primaryUploadIndex = 0;
 
     this.showAddWizard = true;
     this.wizardStep = 1;
 
-    this.newVehicle = {
-      make: v.make ?? '',
-      model: v.model ?? '',
-      year: v.year ?? new Date().getFullYear(),
-      price: v.price ?? 0,
+    // Load full details for edit to populate all fields
+    this.isLoading = true;
+    this.carsApi.getById(v.id)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: dto => {
+          this.newVehicle = this.mapDetailsDtoToForm(dto);
+          const imgs = this.mapDetailsDtoToVehicle(dto).images;
+          this.editingPrimaryImageUrl = imgs[0] || null;
+          this.editingGalleryUrls = imgs.slice(1);
+        },
+        error: err => {
+          console.error(err);
+          // Fallback to minimal fill if details fetch fails
+          this.newVehicle = {
+            brandId: this.brandOptions[0]?.id ?? 0,
+            categoryId: this.categoryOptions[0]?.id ?? 0,
+            carStatusId: this.carStatusOptions[0]?.id ?? 0,
+            vin: v.stockNumber ?? '',
+            stockNumber: v.stockNumber ?? '',
+            inventoryLocation: v.inventoryLocation ?? '',
+            doors: v.doors ?? 4,
+            quantityInStock: v.quantityInStock ?? 1,
 
-      engine: v.engine ?? '',
-      hp: v.hp ?? 0,
-      transmission: v.transmission ?? 'Automatic',
-      drivetrain: v.drivetrain ?? '',
-      fuelType: v.fuelType ?? 'Gasoline',
-      mpg: v.mpg ?? '',
+            make: this.getBrandNameById(this.brandOptions[0]?.id ?? 0) ?? '',
+            model: v.model ?? '',
+            year: v.year ?? new Date().getFullYear(),
+            price: v.price ?? 0,
 
-      bodyType: v.bodyType ?? 'Sedan',
-      miles: v.miles ?? 0,
-      condition: v.condition ?? 'New',
-      seating: v.seating ?? 5,
-      exteriorColor: v.exteriorColor ?? '',
-      interiorColor: v.interiorColor ?? '',
+            engine: v.engine ?? '',
+            hp: v.hp ?? 0,
+            transmission: v.transmission ?? 'Automatic',
+            drivetrain: v.drivetrain ?? '',
+            fuelType: v.fuelType ?? 'Gasoline',
+            mpg: v.mpg ?? '',
 
-      features: (v.features ?? []).join(', '),
-      description: v.description ?? '',
-      status: v.status ?? 'In Stock',
-      images: [],
-    };
+            miles: v.miles ?? 0,
+            condition: v.condition ?? 'Used',
+            seating: v.seating ?? 5,
+            exteriorColor: v.exteriorColor ?? '',
+            interiorColor: v.interiorColor ?? '',
+
+            features: (v.features ?? []).join(', '),
+            description: v.description ?? '',
+            status: v.status ?? 'In Stock',
+            images: [],
+          };
+        }
+      });
 
     setTimeout(() => {
       document.querySelector('.inv-wizard-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -311,202 +505,322 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
     const input = e.target as HTMLInputElement;
     const files = input.files ? Array.from(input.files) : [];
     this.newVehicle.images = files;
+    this.primaryUploadIndex = 0;
   }
 
   saveNewVehicle(): void {
-    const id = Date.now();
+    const api: any = this.carsApi as any;
+    const hasCreate = api && typeof api.create === 'function';
 
-    const coverUrl =
-      this.newVehicle.images.length > 0
-        ? URL.createObjectURL(this.newVehicle.images[0])
-        : 'assets/cars/demo-1.jpg';
+    this.formErrors = this.validateForm(this.newVehicle);
+    if (this.formErrors.length > 0) {
+      this.showValidationDialog();
+      return;
+    }
 
-    const featuresArr = this.parseFeatures(this.newVehicle.features);
+    if (!hasCreate) {
+      const id = Date.now();
+      const coverUrl =
+        this.newVehicle.images.length > 0
+          ? URL.createObjectURL(this.newVehicle.images[0])
+          : '';
 
-    const vehicle: Vehicle = {
-      id,
-      make: this.newVehicle.make.trim(),
-      model: this.newVehicle.model.trim(),
-      year: Number(this.newVehicle.year) || new Date().getFullYear(),
-      condition: this.newVehicle.condition,
-      bodyType: this.newVehicle.bodyType,
-      fuelType: this.newVehicle.fuelType,
-      transmission: this.newVehicle.transmission,
-      hp: Number(this.newVehicle.hp) || 0,
-      miles: Number(this.newVehicle.miles) || 0,
-      price: Number(this.newVehicle.price) || 0,
-      status: this.newVehicle.status,
-      imageUrl: coverUrl,
+      const vehicle: Vehicle = {
+        id,
+        make: this.getBrandNameById(this.newVehicle.brandId) ?? '',
+        model: this.newVehicle.model.trim(),
+        year: Number(this.newVehicle.year) || new Date().getFullYear(),
+        condition: this.newVehicle.condition,
+        fuelType: this.newVehicle.fuelType,
+        transmission: this.newVehicle.transmission,
+        hp: Number(this.newVehicle.hp) || 0,
+        miles: Number(this.newVehicle.miles) || 0,
+        price: Number(this.newVehicle.price) || 0,
+        status: this.newVehicle.status,
+        imageUrl: coverUrl,
+        images: coverUrl ? [coverUrl] : [],
+        engine: this.newVehicle.engine?.trim(),
+        drivetrain: this.newVehicle.drivetrain?.trim(),
+        mpg: this.newVehicle.mpg?.trim(),
+        seating: Number(this.newVehicle.seating) || 5,
+        exteriorColor: this.newVehicle.exteriorColor?.trim(),
+        interiorColor: this.newVehicle.interiorColor?.trim(),
+        description: this.newVehicle.description?.trim(),
+        features: this.parseFeatures(this.newVehicle.features),
+      };
 
-      engine: this.newVehicle.engine?.trim(),
-      drivetrain: this.newVehicle.drivetrain?.trim(),
-      mpg: this.newVehicle.mpg?.trim(),
-      seating: Number(this.newVehicle.seating) || 5,
-      exteriorColor: this.newVehicle.exteriorColor?.trim(),
-      interiorColor: this.newVehicle.interiorColor?.trim(),
-      description: this.newVehicle.description?.trim(),
-      features: featuresArr,
-    };
+      this.vehicles.unshift(vehicle);
+      this.rebuildFilterOptions();
+      this.applyFilters();
+      this.closeWizard();
+      this.showSuccessDialog('Vehicle added successfully', 'The vehicle has been successfully added to the inventory.');
+      return;
+    }
 
-    this.vehicles.unshift(vehicle);
-    this.rebuildFilterOptions();
-    this.applyFilters();
-    this.closeWizard();
-    this.showSuccessDialog(
-    'Vehicle added successfully',
-    'The vehicle has been successfully added to the inventory.');
-  
+    // If files exist, upload first to get URLs; else submit directly
+    if (this.newVehicle.images.length > 0) {
+      const fd = new FormData();
+      this.newVehicle.images.forEach(f => fd.append('Files', f));
+
+      this.isLoading = true;
+      this.carsApi.uploadImages(fd).subscribe({
+        next: res => {
+          const urls = Array.isArray((res as any)?.imageUrls)
+            ? (res as any).imageUrls
+            : Array.isArray((res as any)?.ImageUrls)
+              ? (res as any).ImageUrls
+              : [];
+          const primaryIdx = Math.min(this.primaryUploadIndex, Math.max(urls.length - 1, 0));
+          const primary = urls[primaryIdx] || 'placeholder.jpg';
+          const gallery = urls.filter((_url: string, i: number) => i !== primaryIdx);
+          this.submitCreate(api, primary, gallery);
+        },
+        error: err => {
+          console.error(err);
+          this.isLoading = false;
+          this.loadError = 'Failed to upload images.';
+        }
+      });
+    } else {
+      this.submitCreate(api, 'placeholder.jpg', []);
+    }
   }
 
-  // Update existing vehicle
+  private submitCreate(api: any, primaryUrl: string, galleryUrls: string[]): void {
+    const payload = this.mapWizardToCreatePayload(this.newVehicle, primaryUrl, galleryUrls);
+
+    this.isLoading = true;
+    api.create(payload)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: () => {
+          this.showSuccessDialog('Vehicle added successfully', 'The vehicle has been successfully added to the inventory.');
+          this.closeWizard();
+          this.loadCars();
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.loadError = 'Failed to add vehicle.';
+        }
+      });
+  }
+
   updateVehicle(): void {
     if (!this.isEditMode || this.editingVehicleId == null) return;
 
-    const idx = this.vehicles.findIndex(x => x.id === this.editingVehicleId);
-    if (idx < 0) return;
+    const api: any = this.carsApi as any;
+    const hasUpdate = api && typeof api.update === 'function';
 
-    const current = this.vehicles[idx];
-
-    const coverUrl =
-      this.newVehicle.images.length > 0
-        ? URL.createObjectURL(this.newVehicle.images[0])
-        : current.imageUrl;
-
-    const featuresArr = this.parseFeatures(this.newVehicle.features);
-
-    const updated: Vehicle = {
-      ...current,
-      make: this.newVehicle.make.trim(),
-      model: this.newVehicle.model.trim(),
-      year: Number(this.newVehicle.year) || current.year,
-      price: Number(this.newVehicle.price) || 0,
-
-      engine: this.newVehicle.engine?.trim(),
-      hp: Number(this.newVehicle.hp) || 0,
-      transmission: this.newVehicle.transmission,
-      drivetrain: this.newVehicle.drivetrain?.trim(),
-      fuelType: this.newVehicle.fuelType,
-      mpg: this.newVehicle.mpg?.trim(),
-
-      bodyType: this.newVehicle.bodyType,
-      miles: Number(this.newVehicle.miles) || 0,
-      condition: this.newVehicle.condition,
-      seating: Number(this.newVehicle.seating) || 5,
-      exteriorColor: this.newVehicle.exteriorColor?.trim(),
-      interiorColor: this.newVehicle.interiorColor?.trim(),
-
-      description: this.newVehicle.description?.trim(),
-      features: featuresArr,
-      status: this.newVehicle.status,
-      imageUrl: coverUrl,
-    };
-
-    this.vehicles[idx] = updated;
-
-    if (this.selectedVehicle?.id === updated.id) {
-      this.selectedVehicle = updated;
+    this.formErrors = this.validateForm(this.newVehicle);
+    if (this.formErrors.length > 0) {
+      this.showValidationDialog();
+      return;
     }
 
-    this.rebuildFilterOptions();
-    this.applyFilters();
-    this.closeWizard();
-    this.showSuccessDialog(
-    'Vehicle updated successfully',
-    'The vehicle details have been successfully updated.');
+    if (!hasUpdate) {
+      const idx = this.vehicles.findIndex(x => x.id === this.editingVehicleId);
+      if (idx < 0) return;
 
+      const current = this.vehicles[idx];
+      const coverUrl =
+        this.newVehicle.images.length > 0
+          ? URL.createObjectURL(this.newVehicle.images[0])
+          : current.imageUrl;
+
+      const updated: Vehicle = {
+        ...current,
+        make: this.getBrandNameById(this.newVehicle.brandId) ?? current.make,
+        model: this.newVehicle.model.trim(),
+        year: Number(this.newVehicle.year) || current.year,
+        price: Number(this.newVehicle.price) || 0,
+
+        engine: this.newVehicle.engine?.trim(),
+        hp: Number(this.newVehicle.hp) || 0,
+        transmission: this.newVehicle.transmission,
+        drivetrain: this.newVehicle.drivetrain?.trim(),
+        fuelType: this.newVehicle.fuelType,
+        mpg: this.newVehicle.mpg?.trim(),
+
+        miles: Number(this.newVehicle.miles) || 0,
+        condition: this.newVehicle.condition,
+        seating: Number(this.newVehicle.seating) || 5,
+        exteriorColor: this.newVehicle.exteriorColor?.trim(),
+        interiorColor: this.newVehicle.interiorColor?.trim(),
+
+        description: this.newVehicle.description?.trim(),
+        features: this.parseFeatures(this.newVehicle.features),
+        status: this.newVehicle.status,
+        imageUrl: coverUrl,
+        images: coverUrl ? [coverUrl, ...(current.images ?? [])] : (current.images ?? []),
+      };
+
+      this.vehicles[idx] = updated;
+      if (this.selectedVehicle?.id === updated.id) this.selectedVehicle = updated;
+
+      this.rebuildFilterOptions();
+      this.applyFilters();
+      this.closeWizard();
+      this.showSuccessDialog('Vehicle updated successfully', 'The vehicle details have been successfully updated.');
+      return;
+    }
+
+    const payload: UpdateCarRequest = {
+      ...this.mapWizardToCreatePayload(
+        this.newVehicle,
+        this.editingPrimaryImageUrl || undefined,
+        this.editingGalleryUrls
+      ),
+      id: this.editingVehicleId,
+      galleryImageUrls: this.editingGalleryUrls
+    };
+
+    // If new images uploaded for edit, upload first
+    if (this.newVehicle.images.length > 0) {
+      const fd = new FormData();
+      this.newVehicle.images.forEach(f => fd.append('Files', f));
+
+      this.isLoading = true;
+      this.carsApi.uploadImages(fd).subscribe({
+        next: res => {
+          const urls = Array.isArray((res as any)?.imageUrls)
+            ? (res as any).imageUrls
+            : Array.isArray((res as any)?.ImageUrls)
+              ? (res as any).ImageUrls
+              : [];
+          const primaryIdx = Math.min(this.primaryUploadIndex, Math.max(urls.length - 1, 0));
+          const primary = urls[primaryIdx] || this.editingPrimaryImageUrl || 'placeholder.jpg';
+          const gallery = urls.filter((_url: string, i: number) => i !== primaryIdx);
+          this.submitUpdate(api, { ...payload, primaryImageUrl: primary, galleryImageUrls: gallery });
+        },
+        error: err => {
+          console.error(err);
+          this.isLoading = false;
+          this.loadError = 'Failed to upload images.';
+        }
+      });
+    } else {
+      this.submitUpdate(api, payload);
+    }
+  }
+
+  private submitUpdate(api: any, payload: UpdateCarRequest): void {
+    this.isLoading = true;
+    api.update(payload)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: () => {
+          this.showSuccessDialog('Vehicle updated successfully', 'The vehicle details have been successfully updated.');
+          this.closeWizard();
+          this.loadCars();
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.loadError = 'Failed to update vehicle.';
+        }
+      });
   }
 
   private parseFeatures(raw: string): string[] {
     return raw ? raw.split(',').map(x => x.trim()).filter(Boolean) : [];
   }
 
-  // -----------------------------
-  // View Modal
-  // -----------------------------
-  viewVehicle(v: Vehicle): void {
-    this.selectedVehicle = v;
-    this.showViewModal = true;
-    document.body.classList.add('inv-modal-open');
+  private mapListItemToVehicle(item: any): Vehicle {
+    const cover = this.normalizeImageUrl(item?.primaryImageUrl ?? '');
+    return {
+      id: Number(item?.id) || 0,
+      make: String(item?.make ?? item?.brandName ?? 'Г?"'),
+      model: String(item?.model ?? 'Г?"'),
+      year: Number(item?.year ?? item?.productionYear) || new Date().getFullYear(),
+      condition: ((item?.condition as VehicleCondition) ?? 'Used'),
+      fuelType: String(item?.fuelType ?? 'Г?"'),
+      transmission: String(item?.transmission ?? 'Г?"'),
+      hp: Number(item?.horsePower) || 0,
+      miles: Number(item?.mileage) || 0,
+      price: Number(item?.discountedPrice ?? item?.price ?? 0) || 0,
+      status: this.mapBackendStatusToUi(item?.carStatusName ?? item?.status),
+      imageUrl: cover || '',
+      images: cover ? [cover] : [],
+      _raw: undefined
+    };
   }
 
-  closeViewModal(): void {
-    this.showViewModal = false;
-    this.selectedVehicle = null;
-    document.body.classList.remove('inv-modal-open');
+  private mapDetailsDtoToVehicle(dto: CarDetailsDto): Vehicle {
+    const primary = this.normalizeImageUrl((dto as any).primaryImageUrl ?? '');
+    const gallery = Array.isArray((dto as any).imageUrls) ? (dto as any).imageUrls : [];
+
+    const allImages = [
+      primary,
+      ...gallery.map((x: any) => this.normalizeImageUrl(String(x ?? '')))
+    ].filter((x: string) => !!x);
+
+    const uniqueImages = Array.from(new Set(allImages));
+    const cover = uniqueImages[0] ?? '';
+
+    return {
+      id: Number((dto as any).id) || 0,
+      make: (dto as any).brandName ?? (dto as any).make ?? 'Г?"',
+      model: (dto as any).model ?? 'Г?"',
+      year: (dto as any).productionYear ?? new Date().getFullYear(),
+      condition: ((dto as any).condition as VehicleCondition) ?? 'Used',
+      fuelType: (dto as any).fuelType ?? 'Г?"',
+      transmission: (dto as any).transmission ?? 'Г?"',
+      hp: this.extractNumber((dto as any).horsePower),
+      miles: (dto as any).mileage ?? 0,
+      price: (dto as any).discountedPrice ?? (dto as any).price ?? 0,
+      status: this.mapBackendStatusToUi((dto as any).carStatusName),
+      imageUrl: cover,
+      images: uniqueImages,
+      engine: (dto as any).engine ?? undefined,
+      drivetrain: (dto as any).drivetrain ?? undefined,
+      mpg: (dto as any).epaFuelEconomy ?? undefined,
+      seating: (dto as any).seats ?? undefined,
+      doors: (dto as any).doors ?? undefined,
+      stockNumber: (dto as any).stockNumber ?? undefined,
+      inventoryLocation: (dto as any).inventoryLocation ?? undefined,
+      quantityInStock: (dto as any).quantityInStock ?? undefined,
+      msrp: (dto as any).msrp ?? null,
+      exteriorColor: (dto as any).color ?? undefined,
+      interiorColor: (dto as any).interiorColor ?? undefined,
+      description: (dto as any).description ?? undefined,
+      features: Array.isArray((dto as any).features) ? (dto as any).features : [],
+      _raw: dto
+    };
   }
 
-  // -----------------------------
-  // Card actions
-  // -----------------------------
-  setStatus(v: Vehicle, status: VehicleStatus): void {
-    v.status = status;
-    this.applyFilters();
+  private normalizeImageUrl(url: string): string {
+    const u = (url ?? '').trim();
+    if (!u) return '';
+    if (u.startsWith('http://') || u.startsWith('https://')) return u;
+    // backend returns relative (images/cars/...) -> prefix API host
+    const path = u.startsWith('/') ? u : `/${u}`;
+    return `${environment.apiUrl}${path}`;
   }
 
-  /**  Ovo je nova metoda: koristi shared FitConfirmDialogComponent */
-  confirmDeleteVehicle(v: Vehicle): void {
-    const dialogRef = this.dialog.open(FitConfirmDialogComponent, {
-      width: '420px',
-      disableClose: true,
-      data: <DialogConfig>{
-        type: DialogType.WARNING,
-        title: 'Delete vehicle',
-        message: 'Are you sure you want to delete this vehicle?\nThis action cannot be undone.',
-        buttons: [
-          { type: DialogButton.CANCEL, label: 'No, cancel' },
-          { type: DialogButton.DELETE, label: 'Yes, delete' }
-        ]
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result: DialogResult) => {
-      if (!result) return;
-      if (result.button === DialogButton.DELETE) {
-        this.deleteVehicle(v);
-      }
-    });
+  private extractNumber(input: string | number | null | undefined): number {
+    if (input == null) return 0;
+    if (typeof input === 'number') return input;
+    const m = String(input).match(/\d+/);
+    return m ? Number(m[0]) : 0;
   }
 
-  /* This is succes dialog pop up for add and edit wizard form! */
-  private showSuccessDialog(title: string, message: string): void {
-  this.dialog.open(FitConfirmDialogComponent, {
-    width: '420px',
-    data: <DialogConfig>{
-      type: DialogType.SUCCESS,
-      title,
-      message,
-      buttons: [
-        { type: DialogButton.OK }
-      ]
-    }
-  });
-}
-
-
-  /** Ostaje ista delete logika */
-  private deleteVehicle(v: Vehicle): void {
-    this.vehicles = this.vehicles.filter((x) => x.id !== v.id);
-    this.rebuildFilterOptions();
-    this.applyFilters();
-
-    if (this.selectedVehicle?.id === v.id) {
-      this.closeViewModal();
-    }
-
-    if (this.editingVehicleId === v.id) {
-      this.closeWizard();
-    }
-  }
-
-  // -----------------------------
-  // UI helpers
-  // -----------------------------
-  badgeClass(status: VehicleStatus): string {
-    return status === 'In Stock' ? 'ok' : status === 'Limited' ? 'warn' : 'bad';
+  private mapBackendStatusToUi(name: string | null | undefined): VehicleStatus {
+    const s = (name || '').toLowerCase();
+    if (s.includes('sold')) return 'Sold';
+    if (s.includes('limit')) return 'Limited';
+    return 'In Stock';
   }
 
   private createEmptyForm(): NewVehicleForm {
     return {
+      brandId: 0,
+      categoryId: 0,
+      carStatusId: 0,
+      vin: '',
+      stockNumber: '',
+      inventoryLocation: '',
+      doors: 4,
+      quantityInStock: 1,
+
       make: '',
       model: '',
       year: new Date().getFullYear(),
@@ -519,9 +833,8 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
       fuelType: 'Gasoline',
       mpg: '',
 
-      bodyType: 'Sedan',
       miles: 0,
-      condition: 'New',
+      condition: 'Used',
       seating: 5,
       exteriorColor: '',
       interiorColor: '',
@@ -531,5 +844,187 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
       status: 'In Stock',
       images: [],
     };
+  }
+
+  activeImageIndex = 0;
+
+  onCarouselSlide(ev: any): void {
+    const to = Number(ev?.to);
+    if (!Number.isNaN(to)) this.activeImageIndex = to;
+  }
+
+  resetCarouselIndex(): void {
+    this.activeImageIndex = 0;
+  }
+
+  private mapWizardToCreatePayload(
+    form: NewVehicleForm,
+    primaryImageUrl?: string,
+    galleryImageUrls?: string[]
+  ): CreateCarRequest {
+    return {
+      brandId: form.brandId,
+      categoryId: form.categoryId,
+      carStatusId: form.carStatusId,
+
+      condition: form.condition,
+      stockNumber: form.stockNumber.trim(),
+      inventoryLocation: form.inventoryLocation.trim(),
+      doors: Number(form.doors) || 4,
+      seats: Number(form.seating) || 5,
+      quantityInStock: Number(form.quantityInStock) || 1,
+
+      model: form.model.trim(),
+      vin: form.vin.trim(),
+      productionYear: Number(form.year) || new Date().getFullYear(),
+      mileage: Number(form.miles) || 0,
+
+      color: form.exteriorColor?.trim() || 'N/A',
+      transmission: form.transmission,
+      fuelType: form.fuelType,
+      drivetrain: form.drivetrain?.trim() || '',
+      engine: form.engine?.trim() || '',
+      horsePower: Number(form.hp) || 0,
+
+      epaFuelEconomy: form.mpg?.trim() || null,
+      msrp: null,
+      description: form.description?.trim() || '',
+      price: Number(form.price) || 0,
+      discountedPrice: null,
+      dateAdded: new Date().toISOString(),
+
+      primaryImageUrl: primaryImageUrl ?? form.images[0]?.name ?? 'placeholder.jpg',
+      galleryImageUrls: galleryImageUrls ?? this.mapGalleryImages(form.images),
+      features: this.parseFeatures(form.features),
+    };
+  }
+
+  private mapGalleryImages(files: File[]): string[] {
+    return files.slice(1).map(f => f.name);
+  }
+
+  private getBrandNameById(id: number): string | undefined {
+    return this.brandOptions.find(b => b.id === id)?.name;
+  }
+
+  private validateForm(form: NewVehicleForm): string[] {
+    const errors: string[] = [];
+
+    if (!form.brandId) errors.push('Brand is required.');
+    if (!form.categoryId) errors.push('Category is required.');
+    if (!form.carStatusId) errors.push('Status is required.');
+    if (!form.model?.trim()) errors.push('Model is required.');
+    if (!form.vin?.trim()) errors.push('VIN is required.');
+    if (!form.stockNumber?.trim()) errors.push('Stock number is required.');
+    if (!form.inventoryLocation?.trim()) errors.push('Inventory location is required.');
+    if (!form.fuelType?.trim()) errors.push('Fuel type is required.');
+    if (!form.transmission?.trim()) errors.push('Transmission is required.');
+    if (!form.engine?.trim()) errors.push('Engine is required.');
+    if ((Number(form.year) || 0) < 1900) errors.push('Year must be valid.');
+    if ((Number(form.price) || 0) <= 0) errors.push('Price must be greater than 0.');
+    if ((Number(form.hp) || 0) <= 0) errors.push('Horsepower must be greater than 0.');
+    if ((Number(form.doors) || 0) <= 0) errors.push('Doors must be greater than 0.');
+    if ((Number(form.quantityInStock) || 0) <= 0) errors.push('Quantity must be greater than 0.');
+    if (!form.description?.trim()) errors.push('Description is required.');
+
+    return errors;
+  }
+
+  getFieldError(field: string): string | null {
+    const f = this.newVehicle;
+    switch (field) {
+      case 'brandId':
+        return f.brandId ? null : 'Brand is required.';
+      case 'categoryId':
+        return f.categoryId ? null : 'Category is required.';
+      case 'carStatusId':
+        return f.carStatusId ? null : 'Status is required.';
+      case 'model':
+        return f.model?.trim() ? null : 'Model is required.';
+      case 'vin': {
+        const v = f.vin?.trim() ?? '';
+        if (!v) return 'VIN is required.';
+        if (v.length !== 17) return 'VIN must be 17 characters.';
+        return null;
+      }
+      case 'stockNumber':
+        return f.stockNumber?.trim() ? null : 'Stock number is required.';
+      case 'inventoryLocation':
+        return f.inventoryLocation?.trim() ? null : 'Inventory location is required.';
+      case 'year':
+        return (Number(f.year) || 0) >= 1900 ? null : 'Year must be valid.';
+      case 'price':
+        return (Number(f.price) || 0) > 0 ? null : 'Price must be greater than 0.';
+      case 'hp':
+        return (Number(f.hp) || 0) > 0 ? null : 'Horsepower must be greater than 0.';
+      case 'doors':
+        return (Number(f.doors) || 0) > 0 ? null : 'Doors must be greater than 0.';
+      case 'quantityInStock':
+        return (Number(f.quantityInStock) || 0) > 0 ? null : 'Quantity must be greater than 0.';
+      case 'description':
+        return f.description?.trim() ? null : 'Description is required.';
+      default:
+        return null;
+    }
+  }
+
+  isInvalid(field: string): boolean {
+    return !!this.getFieldError(field);
+  }
+
+  private showValidationDialog(): void {
+    this.dialog.open(FitConfirmDialogComponent, {
+      width: '420px',
+      data: <DialogConfig>{
+        type: DialogType.WARNING,
+        title: 'Please fix the form',
+        message: this.formErrors.join('\n'),
+        buttons: [{ type: DialogButton.OK, label: 'Close' }]
+      }
+    });
+  }
+
+  private mapDetailsDtoToForm(dto: CarDetailsDto): NewVehicleForm {
+    return {
+      brandId: (dto as any).brandId ?? 0,
+      categoryId: (dto as any).categoryId ?? 0,
+      carStatusId: (dto as any).carStatusId ?? 0,
+      vin: (dto as any).vin ?? '',
+      stockNumber: (dto as any).stockNumber ?? '',
+      inventoryLocation: (dto as any).inventoryLocation ?? '',
+      doors: (dto as any).doors ?? 4,
+      quantityInStock: (dto as any).quantityInStock ?? 1,
+
+      make: (dto as any).brandName ?? '',
+      model: (dto as any).model ?? '',
+      year: (dto as any).productionYear ?? new Date().getFullYear(),
+      price: (dto as any).price ?? (dto as any).discountedPrice ?? 0,
+
+      engine: (dto as any).engine ?? '',
+      hp: (dto as any).horsePower ?? 0,
+      transmission: (dto as any).transmission ?? 'Automatic',
+      drivetrain: (dto as any).drivetrain ?? '',
+      fuelType: (dto as any).fuelType ?? 'Gasoline',
+      mpg: (dto as any).epaFuelEconomy ?? '',
+
+      miles: (dto as any).mileage ?? 0,
+      condition: (dto as any).condition as VehicleCondition ?? 'Used',
+      seating: (dto as any).seats ?? 5,
+      exteriorColor: (dto as any).color ?? '',
+      interiorColor: (dto as any).interiorColor ?? '',
+
+      features: Array.isArray((dto as any).features) ? (dto as any).features.join(', ') : '',
+      description: (dto as any).description ?? '',
+      status: this.mapBackendStatusToUi((dto as any).carStatusName),
+      images: [],
+    };
+  }
+
+  private syncPaginatorVm(): void {
+    this.paginatorVm.request.paging.page = this.page;
+    this.paginatorVm.request.paging.pageSize = this.pageSize;
+    this.paginatorVm.totalItems = this.totalCount;
+    this.paginatorVm.totalPages = this.totalPages;
+    this.paginatorVm.isLoading = this.isLoading;
   }
 }

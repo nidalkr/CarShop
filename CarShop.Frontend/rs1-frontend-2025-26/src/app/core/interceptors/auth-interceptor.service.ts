@@ -22,6 +22,7 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthFacadeService);
+  
 
   // 1) Skip SAMO login/register/refresh – NE i logout
   if (isAuthEndpoint(req.url)) {
@@ -39,6 +40,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       },
     });
   }
+  console.log('[AUTH INT]', req.method, req.url, 'token?', !!auth.getAccessToken());
 
   // 3) Handle 401 → refresh → retry
   return next(authReq).pipe(
@@ -49,6 +51,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       return throwError(() => err);
     })
   );
+
+  
 };
 
 /**
@@ -117,4 +121,5 @@ function handle401Error(
       return throwError(() => error);
     })
   );
+  
 }
