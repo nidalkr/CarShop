@@ -374,7 +374,6 @@
 
     <!-- ACTIONS -->
     <div class="wizard-actions">
-      <!-- left: Cancel or Back -->
       <button
         class="btn-soft-gray"
         type="button"
@@ -393,7 +392,6 @@
         Back
       </button>
 
-      <!-- right: Next or Save -->
       <button
         class="btn-primary"
         type="button"
@@ -450,9 +448,9 @@
           <div><span class="material-icons">local_gas_station</span>{{ v.fuelType }}</div>
           <div><span class="material-icons">settings</span>{{ v.transmission }}</div>
           <div><span class="material-icons">bolt</span>{{ v.hp }} hp</div>
+          <div><span class="material-icons">category</span>{{ v.categoryName }} </div>
         </div>
 
-        <!--  actions -->
         <div class="vehicle-actions-grid">
           <button class="btn-soft" type="button" (click)="viewVehicle(v)">
             <span class="material-icons">visibility</span> View
@@ -486,7 +484,9 @@
   </div>
 
   <!-- ================= PAGINATION ================= -->
+  <div class="inv-paginator">
   <app-fit-paginator-bar [vm]="paginatorVm"></app-fit-paginator-bar>
+  </div>
 
   <!-- ================= VIEW MODAL (POPUP) ================= -->
   <div
@@ -520,29 +520,51 @@
       <div class="inv-modal-body" *ngIf="selectedVehicle as v">
 
         <div class="inv-modal-hero">
-        <div id="invModalCarousel" class="carousel slide" data-bs-ride="false" (slide.bs.carousel)="onCarouselSlide($event)">
-            <div class="carousel-inner">
-              <div
-                class="carousel-item"
-                *ngFor="let img of v.images; let i = index"
-                [class.active]="i === 0"
-              >
-                <img [src]="img" [alt]="v.make + ' ' + v.model">
-              </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#invModalCarousel" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#invModalCarousel" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Next</span>
-            </button>
+          <button class="hero-nav prev" type="button" *ngIf="(v.images?.length || 0) > 1" (click)="prevImage()">
+            <span class="material-icons">chevron_left</span>
+          </button>
+
+          <img
+            [src]="v.images?.[activeImageIndex] || v.imageUrl"
+            [alt]="v.make + ' ' + v.model"
+            (click)="openZoom(v.images?.[activeImageIndex] || v.imageUrl, $event)"
+            (mousemove)="onHeroMouseMove($event, v.images?.[activeImageIndex] || v.imageUrl)"
+            (mouseleave)="onHeroMouseLeave()"
+            [style.transform]="zoomedImage ? 'scale(' + zoomScale + ')' : 'none'"
+            [style.transform-origin]="zoomOrigin"
+          />
+
+          <div
+            class="lens"
+            *ngIf="lensVisible"
+            [style.width.px]="lensSize"
+            [style.height.px]="lensSize"
+            [style.left.px]="lensX"
+            [style.top.px]="lensY"
+            [style.backgroundImage]="'url(' + lensBgImage + ')'"
+            [style.backgroundSize]="(lensZoom * 100) + '%'"
+            [style.backgroundPosition]="lensBgPos">
           </div>
+
+          <button class="hero-nav next" type="button" *ngIf="(v.images?.length || 0) > 1" (click)="nextImage()">
+            <span class="material-icons">chevron_right</span>
+          </button>
+
           <span class="pill" [ngClass]="badgeClass(v.status)">{{ v.status }}</span>
-          <span class="inv-img-counter" *ngIf="v.images.length">
-            {{ activeImageIndex + 1 }} / {{ v.images.length }}
+          <span class="inv-img-counter" *ngIf="(v.images?.length || 0) > 0">
+            {{ activeImageIndex + 1 }} / {{ v.images?.length || 0 }}
           </span>
+        </div>
+
+        <div class="inv-thumb-strip" *ngIf="(v.images?.length || 0) > 1">
+          <button
+            type="button"
+            class="thumb"
+            *ngFor="let img of v.images; let i = index"
+            [class.active]="i === activeImageIndex"
+            (click)="setActiveImage(i)">
+            <img [src]="img" [alt]="v.make + ' ' + v.model + ' thumb ' + (i + 1)">
+          </button>
         </div>
 
         <div class="inv-modal-price">
@@ -561,6 +583,7 @@
           <div class="info-tile"><div class="k">Year</div><div class="v">{{ v.year }}</div></div>
           <div class="info-tile"><div class="k">Condition</div><div class="v">{{ v.condition }}</div></div>
           <div class="info-tile"><div class="k">Mileage</div><div class="v">{{ v.miles }} km</div></div>
+          <div class="info-tile"><div class="k">Body type</div><div class="v">{{ v.categoryName }}</div></div>
         </div>
       </div>
 
@@ -636,6 +659,6 @@
     </div>
   </div>
 
+  
+
 </div>
-
-
