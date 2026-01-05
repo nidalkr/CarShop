@@ -1,6 +1,8 @@
 ﻿using CarShop.Application.Modules.Cars.Commands.Create;
 using CarShop.Application.Modules.Cars.Commands.Delete;
+using CarShop.Application.Modules.Cars.Commands.DeleteImage;
 using CarShop.Application.Modules.Cars.Commands.Update;
+using CarShop.Application.Modules.Cars.Commands.UploadImages;
 using CarShop.Application.Modules.Cars.Dtos;
 using CarShop.Application.Modules.Cars.Queries.GetCarById;
 using CarShop.Application.Modules.Cars.Queries.GetCars;
@@ -49,4 +51,17 @@ public sealed class CarsController(IMediator mediator) : ControllerBase
         await mediator.Send(new DeleteCarCommand { Id = id }, ct);
         return NoContent();
     }
+
+    [HttpPost("images")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UploadCarImagesResponseDto>> UploadImages([FromForm] UploadCarImagesCommand cmd, CancellationToken ct)
+    => Ok(await mediator.Send(cmd, ct));
+
+    [HttpDelete("images")]
+    public async Task<IActionResult> DeleteImage([FromQuery] string url, CancellationToken ct)
+    {
+        await mediator.Send(new DeleteCarImageCommand { ImageUrl = url }, ct);
+        return NoContent();
+    }
+
 }

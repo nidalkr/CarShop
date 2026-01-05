@@ -262,11 +262,6 @@ namespace CarShop.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BodyStyle")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<int>("BrandId")
                         .HasColumnType("int");
 
@@ -280,6 +275,11 @@ namespace CarShop.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
@@ -297,6 +297,9 @@ namespace CarShop.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("Doors")
+                        .HasColumnType("int");
+
                     b.Property<string>("Drivetrain")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -307,15 +310,22 @@ namespace CarShop.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("EpaFuelEconomy")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("FuelType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("HorsePower")
+                    b.Property<int>("HorsePower")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InventoryLocation")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -331,17 +341,27 @@ namespace CarShop.Infrastructure.Migrations
                     b.Property<DateTime?>("ModifiedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("Msrp")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("PrimaryImageURL")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<int>("ProductionYear")
                         .HasColumnType("int");
+
+                    b.Property<int>("QuantityInStock")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Seats")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StockNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Transmission")
                         .IsRequired()
@@ -365,6 +385,74 @@ namespace CarShop.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Cars", (string)null);
+                });
+
+            modelBuilder.Entity("CarShop.Domain.Entities.Catalog.CarFeatureEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarId", "Feature")
+                        .IsUnique();
+
+                    b.ToTable("CarFeatures", (string)null);
+                });
+
+            modelBuilder.Entity("CarShop.Domain.Entities.Catalog.CarImageEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarId", "IsPrimary");
+
+                    b.ToTable("CarImages", (string)null);
                 });
 
             modelBuilder.Entity("CarShop.Domain.Entities.Catalog.CategoryEntity", b =>
@@ -1048,6 +1136,28 @@ namespace CarShop.Infrastructure.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("CarShop.Domain.Entities.Catalog.CarFeatureEntity", b =>
+                {
+                    b.HasOne("CarShop.Domain.Entities.Catalog.CarEntity", "Car")
+                        .WithMany("Features")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+                });
+
+            modelBuilder.Entity("CarShop.Domain.Entities.Catalog.CarImageEntity", b =>
+                {
+                    b.HasOne("CarShop.Domain.Entities.Catalog.CarEntity", "Car")
+                        .WithMany("Images")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+                });
+
             modelBuilder.Entity("CarShop.Domain.Entities.Commerce.CartEntity", b =>
                 {
                     b.HasOne("CarShop.Domain.Entities.Catalog.CarEntity", "Car")
@@ -1243,6 +1353,10 @@ namespace CarShop.Infrastructure.Migrations
                     b.Navigation("Carts");
 
                     b.Navigation("Favourites");
+
+                    b.Navigation("Features");
+
+                    b.Navigation("Images");
 
                     b.Navigation("Inquiries");
 

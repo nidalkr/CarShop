@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
+using CarShop.Infrastructure.Services;
+
 
 namespace CarShop.Infrastructure;
 
@@ -40,6 +43,9 @@ public static class DependencyInjection
         // IAppDbContext mapping
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<DatabaseContext>());
 
+        // File storage for wwwroot images/cars
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
         // Identity hasher
         services.AddScoped<IPasswordHasher<CarShopUserEntity>, PasswordHasher<CarShopUserEntity>>();
 
@@ -52,6 +58,9 @@ public static class DependencyInjection
 
         // TimeProvider (if used in handlers/services)
         services.AddSingleton<TimeProvider>(TimeProvider.System);
+
+        
+
 
         return services;
     }

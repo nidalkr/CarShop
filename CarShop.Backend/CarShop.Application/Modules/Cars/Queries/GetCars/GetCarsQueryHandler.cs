@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,9 +48,14 @@ namespace CarShop.Application.Modules.Cars.Queries.GetCars
                 Price = x.Price,
                 DiscountedPrice = x.DiscountedPrice,
                 Mileage = x.Mileage,
-                BodyStyle = x.BodyStyle,
+                HorsePower = x.HorsePower,
                 Transmission = x.Transmission,
-                FuelType = x.FuelType
+                FuelType = x.FuelType,
+
+                PrimaryImageUrl = x.Images
+                    .Where(i => i.IsPrimary)
+                    .Select(i => i.ImageUrl)
+                    .FirstOrDefault()
             });
 
             return await PageResult<CarDto>.FromQueryableAsync(dtoQuery, request.Paging, ct);

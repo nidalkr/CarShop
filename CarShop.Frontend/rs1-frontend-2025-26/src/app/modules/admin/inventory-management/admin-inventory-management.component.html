@@ -10,7 +10,7 @@
         <input
           class="inv-search__input"
           type="text"
-          placeholder="Search by make, model, or year..."
+          placeholder="Search by brand, model, or year..."
           [(ngModel)]="query"
           (ngModelChange)="applyFilters()"
         />
@@ -45,13 +45,8 @@
 
       <div class="filters-grid">
         <select class="inv-select" [(ngModel)]="selectedMake" (change)="applyFilters()">
-          <option value="all">All Makes</option>
+          <option value="all">All Brands</option>
           <option *ngFor="let m of makeOptions" [value]="m">{{ m }}</option>
-        </select>
-
-        <select class="inv-select" [(ngModel)]="selectedBodyType" (change)="applyFilters()">
-          <option value="all">All Body Types</option>
-          <option *ngFor="let b of bodyTypeOptions" [value]="b">{{ b }}</option>
         </select>
 
         <select class="inv-select" [(ngModel)]="selectedFuelType" (change)="applyFilters()">
@@ -98,18 +93,10 @@
       <div class="inv-offcanvas-grid">
 
         <div class="inv-field">
-          <label class="inv-label">Make</label>
+          <label class="inv-label">Brand</label>
           <select class="inv-select" [(ngModel)]="selectedMake" (change)="applyFilters()">
-            <option value="all">All Makes</option>
+            <option value="all">All Brands</option>
             <option *ngFor="let m of makeOptions" [value]="m">{{ m }}</option>
-          </select>
-        </div>
-
-        <div class="inv-field">
-          <label class="inv-label">Body type</label>
-          <select class="inv-select" [(ngModel)]="selectedBodyType" (change)="applyFilters()">
-            <option value="all">All Body Types</option>
-            <option *ngFor="let b of bodyTypeOptions" [value]="b">{{ b }}</option>
           </select>
         </div>
 
@@ -159,6 +146,13 @@
       </button>
     </div>
 
+    <div class="inv-form-errors" *ngIf="formErrors.length">
+      <div class="error-title">Please fix the following:</div>
+      <ul>
+        <li *ngFor="let e of formErrors">{{ e }}</li>
+      </ul>
+    </div>
+
     <div class="wizard-progress">
       <div class="wizard-progress__bar" [style.width.%]="wizardStep * 25"></div>
     </div>
@@ -169,23 +163,65 @@
 
       <div class="form-grid">
         <div class="field">
-          <label>Make *</label>
-          <input class="inv-input" [(ngModel)]="newVehicle.make">
+          <label>Brand *</label>
+          <select class="inv-input" [(ngModel)]="newVehicle.brandId" [class.invalid]="isInvalid('brandId')">
+            <option [value]="0" disabled>Select brand</option>
+            <option *ngFor="let b of brandOptions" [value]="b.id">{{ b.name }}</option>
+          </select>
+          <div class="field-error" *ngIf="getFieldError('brandId') as err">{{ err }}</div>
+        </div>
+
+        <div class="field">
+          <label>Category *</label>
+          <select class="inv-input" [(ngModel)]="newVehicle.categoryId" [class.invalid]="isInvalid('categoryId')">
+            <option [value]="0" disabled>Select category</option>
+            <option *ngFor="let c of categoryOptions" [value]="c.id">{{ c.name }}</option>
+          </select>
+          <div class="field-error" *ngIf="getFieldError('categoryId') as err">{{ err }}</div>
+        </div>
+
+        <div class="field">
+          <label>Car Status *</label>
+          <select class="inv-input" [(ngModel)]="newVehicle.carStatusId" [class.invalid]="isInvalid('carStatusId')">
+            <option *ngFor="let s of carStatusOptions" [value]="s.id">{{ s.name }}</option>
+          </select>
+          <div class="field-error" *ngIf="getFieldError('carStatusId') as err">{{ err }}</div>
         </div>
 
         <div class="field">
           <label>Model *</label>
-          <input class="inv-input" [(ngModel)]="newVehicle.model">
+          <input class="inv-input" [(ngModel)]="newVehicle.model" [class.invalid]="isInvalid('model')">
+          <div class="field-error" *ngIf="getFieldError('model') as err">{{ err }}</div>
         </div>
 
         <div class="field">
           <label>Year *</label>
-          <input class="inv-input" type="number" [(ngModel)]="newVehicle.year">
+          <input class="inv-input" type="number" [(ngModel)]="newVehicle.year" [class.invalid]="isInvalid('year')">
+          <div class="field-error" *ngIf="getFieldError('year') as err">{{ err }}</div>
         </div>
 
         <div class="field">
           <label>Price *</label>
-          <input class="inv-input" type="number" [(ngModel)]="newVehicle.price">
+          <input class="inv-input" type="number" [(ngModel)]="newVehicle.price" [class.invalid]="isInvalid('price')">
+          <div class="field-error" *ngIf="getFieldError('price') as err">{{ err }}</div>
+        </div>
+
+        <div class="field">
+          <label>VIN *</label>
+          <input class="inv-input" [(ngModel)]="newVehicle.vin" placeholder="17-char VIN" [class.invalid]="isInvalid('vin')">
+          <div class="field-error" *ngIf="getFieldError('vin') as err">{{ err }}</div>
+        </div>
+
+        <div class="field">
+          <label>Stock Number *</label>
+          <input class="inv-input" [(ngModel)]="newVehicle.stockNumber" [class.invalid]="isInvalid('stockNumber')">
+          <div class="field-error" *ngIf="getFieldError('stockNumber') as err">{{ err }}</div>
+        </div>
+
+        <div class="field">
+          <label>Inventory Location *</label>
+          <input class="inv-input" [(ngModel)]="newVehicle.inventoryLocation" [class.invalid]="isInvalid('inventoryLocation')">
+          <div class="field-error" *ngIf="getFieldError('inventoryLocation') as err">{{ err }}</div>
         </div>
       </div>
     </div>
@@ -197,12 +233,14 @@
       <div class="form-grid">
         <div class="field">
           <label>Engine *</label>
-          <input class="inv-input" [(ngModel)]="newVehicle.engine">
+          <input class="inv-input" [(ngModel)]="newVehicle.engine" [class.invalid]="isInvalid('engine')">
+          <div class="field-error" *ngIf="getFieldError('engine') as err">{{ err }}</div>
         </div>
 
         <div class="field">
           <label>Horsepower *</label>
-          <input class="inv-input" type="number" [(ngModel)]="newVehicle.hp">
+          <input class="inv-input" type="number" [(ngModel)]="newVehicle.hp" [class.invalid]="isInvalid('hp')">
+          <div class="field-error" *ngIf="getFieldError('hp') as err">{{ err }}</div>
         </div>
 
         <div class="field">
@@ -215,11 +253,12 @@
 
         <div class="field">
           <label>Fuel Type *</label>
-          <select class="inv-input" [(ngModel)]="newVehicle.fuelType">
+          <select class="inv-input" [(ngModel)]="newVehicle.fuelType" [class.invalid]="isInvalid('fuelType')">
             <option value="Gasoline">Gasoline</option>
             <option value="Diesel">Diesel</option>
             <option value="Electric">Electric</option>
           </select>
+          <div class="field-error" *ngIf="getFieldError('fuelType') as err">{{ err }}</div>
         </div>
 
         <div class="field">
@@ -240,15 +279,6 @@
 
       <div class="form-grid">
         <div class="field">
-          <label>Body Type *</label>
-          <select class="inv-input" [(ngModel)]="newVehicle.bodyType">
-            <option value="Sedan">Sedan</option>
-            <option value="SUV">SUV</option>
-            <option value="Coupe">Coupe</option>
-          </select>
-        </div>
-
-        <div class="field">
           <label>Mileage *</label>
           <input class="inv-input" type="number" [(ngModel)]="newVehicle.miles">
         </div>
@@ -264,6 +294,18 @@
         <div class="field">
           <label>Seating Capacity</label>
           <input class="inv-input" type="number" [(ngModel)]="newVehicle.seating">
+        </div>
+
+        <div class="field">
+          <label>Doors *</label>
+          <input class="inv-input" type="number" [(ngModel)]="newVehicle.doors" [class.invalid]="isInvalid('doors')">
+          <div class="field-error" *ngIf="getFieldError('doors') as err">{{ err }}</div>
+        </div>
+
+        <div class="field">
+          <label>Quantity In Stock *</label>
+          <input class="inv-input" type="number" [(ngModel)]="newVehicle.quantityInStock" [class.invalid]="isInvalid('quantityInStock')">
+          <div class="field-error" *ngIf="getFieldError('quantityInStock') as err">{{ err }}</div>
         </div>
 
         <div class="field">
@@ -285,7 +327,8 @@
       <div class="form-grid">
         <div class="field" style="grid-column: 1 / -1;">
           <label>Description *</label>
-          <textarea class="inv-textarea" rows="4" [(ngModel)]="newVehicle.description"></textarea>
+          <textarea class="inv-textarea" rows="4" [(ngModel)]="newVehicle.description" [class.invalid]="isInvalid('description')"></textarea>
+          <div class="field-error" *ngIf="getFieldError('description') as err">{{ err }}</div>
         </div>
 
         <div class="field" style="grid-column: 1 / -1;">
@@ -310,6 +353,20 @@
           </div>
           <div class="file-meta" *ngIf="isEditMode && !newVehicle.images.length">
             (Optional) Leave empty to keep current cover image.
+          </div>
+          <div class="file-list" *ngIf="newVehicle.images.length">
+            <div class="file-row" *ngFor="let f of newVehicle.images; let i = index">
+              <label class="file-radio">
+                <input
+                  type="radio"
+                  name="primaryImage"
+                  [checked]="primaryUploadIndex === i"
+                  (change)="primaryUploadIndex = i"
+                />
+                <span class="file-name">{{ f.name }}</span>
+                <span class="pill" *ngIf="primaryUploadIndex === i">Primary</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -359,6 +416,20 @@
 
   <!-- ================= VEHICLE GRID ================= -->
   <div class="inv-grid">
+    <div class="vehicle-card" *ngIf="isLoading">
+      <div class="vehicle-media skeleton"></div>
+      <div class="vehicle-body">
+        <div class="vehicle-title skeleton-line"></div>
+        <div class="vehicle-sub skeleton-line short"></div>
+        <div class="vehicle-price skeleton-line"></div>
+        <div class="vehicle-specs">
+          <div class="skeleton-line tiny"></div>
+          <div class="skeleton-line tiny"></div>
+          <div class="skeleton-line tiny"></div>
+          <div class="skeleton-line tiny"></div>
+        </div>
+      </div>
+    </div>
     <div class="vehicle-card" *ngFor="let v of filteredVehicles">
 
       <div class="vehicle-media">
@@ -372,17 +443,16 @@
 
         <div class="vehicle-price">
           ${{ v.price | number:'1.0-0' }}
-          <span class="muted"> · {{ v.miles }} miles</span>
+          <span class="muted"> · {{ v.miles }} km</span>
         </div>
 
         <div class="vehicle-specs">
-          <div><span class="material-icons">directions_car</span>{{ v.bodyType }}</div>
           <div><span class="material-icons">local_gas_station</span>{{ v.fuelType }}</div>
           <div><span class="material-icons">settings</span>{{ v.transmission }}</div>
           <div><span class="material-icons">bolt</span>{{ v.hp }} hp</div>
         </div>
 
-        <!--  NEW: 2x2 actions like your screenshot -->
+        <!--  actions -->
         <div class="vehicle-actions-grid">
           <button class="btn-soft" type="button" (click)="viewVehicle(v)">
             <span class="material-icons">visibility</span> View
@@ -414,6 +484,9 @@
 
     </div>
   </div>
+
+  <!-- ================= PAGINATION ================= -->
+  <app-fit-paginator-bar [vm]="paginatorVm"></app-fit-paginator-bar>
 
   <!-- ================= VIEW MODAL (POPUP) ================= -->
   <div
@@ -447,8 +520,29 @@
       <div class="inv-modal-body" *ngIf="selectedVehicle as v">
 
         <div class="inv-modal-hero">
-          <img [src]="v.imageUrl" [alt]="v.make + ' ' + v.model">
+        <div id="invModalCarousel" class="carousel slide" data-bs-ride="false" (slide.bs.carousel)="onCarouselSlide($event)">
+            <div class="carousel-inner">
+              <div
+                class="carousel-item"
+                *ngFor="let img of v.images; let i = index"
+                [class.active]="i === 0"
+              >
+                <img [src]="img" [alt]="v.make + ' ' + v.model">
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#invModalCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#invModalCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
           <span class="pill" [ngClass]="badgeClass(v.status)">{{ v.status }}</span>
+          <span class="inv-img-counter" *ngIf="v.images.length">
+            {{ activeImageIndex + 1 }} / {{ v.images.length }}
+          </span>
         </div>
 
         <div class="inv-modal-price">
@@ -461,15 +555,14 @@
         <div class="inv-modal-section">
           <div class="inv-modal-section__title">Basic Information</div>
 
-          <div class="inv-modal-grid">
-            <div class="info-tile"><div class="k">Make</div><div class="v">{{ v.make }}</div></div>
-            <div class="info-tile"><div class="k">Model</div><div class="v">{{ v.model }}</div></div>
-            <div class="info-tile"><div class="k">Year</div><div class="v">{{ v.year }}</div></div>
-            <div class="info-tile"><div class="k">Body Type</div><div class="v">{{ v.bodyType }}</div></div>
-            <div class="info-tile"><div class="k">Condition</div><div class="v">{{ v.condition }}</div></div>
-            <div class="info-tile"><div class="k">Mileage</div><div class="v">{{ v.miles }} miles</div></div>
-          </div>
+        <div class="inv-modal-grid">
+          <div class="info-tile"><div class="k">Brand</div><div class="v">{{ v.make }}</div></div>
+          <div class="info-tile"><div class="k">Model</div><div class="v">{{ v.model }}</div></div>
+          <div class="info-tile"><div class="k">Year</div><div class="v">{{ v.year }}</div></div>
+          <div class="info-tile"><div class="k">Condition</div><div class="v">{{ v.condition }}</div></div>
+          <div class="info-tile"><div class="k">Mileage</div><div class="v">{{ v.miles }} km</div></div>
         </div>
+      </div>
 
         <div class="inv-modal-section">
           <div class="inv-modal-section__title">Technical Specifications</div>
@@ -544,3 +637,5 @@
   </div>
 
 </div>
+
+
