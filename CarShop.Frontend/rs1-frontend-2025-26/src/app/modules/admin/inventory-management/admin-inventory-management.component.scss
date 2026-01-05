@@ -391,6 +391,7 @@
   height: 250px;
   background: #0b1220;
 
+  /* ✅ kartice: full, bez traka -> cover */
   img{
     width: 100%;
     height: 100%;
@@ -497,6 +498,7 @@
   100%{ background-position: -200% 0; }
 }
 
+
 .btn-soft{
   height: 38px;
   border-radius: 12px;
@@ -551,7 +553,7 @@
 }
 
 .inv-modal-card{
-  width: min(1100px, 100%);
+  width: min(1100px, 100%);            /* ✅ malo šire */
   max-height: min(90vh, 920px);
   background: #fff;
   border: 1px solid #e8eef7;
@@ -603,65 +605,23 @@
   overflow: auto;
 }
 
-.inv-paginator{
-  margin-top: 20px;
-}
-
 /* =========================
-   HERO + GALLERY
+   ✅ MODAL HERO FULL SIZE (bez traka)
    ========================= */
 
 .inv-modal-hero{
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 100%;                    /* ✅ full size hero */
   border-radius: 16px;
   overflow: hidden;
   background: #0b1220;
 
-  img{
-    width: 100%;
+  /* Bootstrap carousel must fill hero height */
+  .carousel,
+  .carousel-inner,
+  .carousel-item{
     height: 100%;
-    display: block;
-    object-fit: cover!important;
-    object-position: center!important;
-    cursor: zoom-in;
-  }
-
-  .lens{
-  position: absolute;
-  pointer-events: none;
-  border: 2px solid rgba(255,255,255,0.9);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-  border-radius: 50%;
-  background-repeat: no-repeat;
-  mix-blend-mode: multiply;
-  overflow: hidden;
-}
-
-.zoom-img{
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-  transition: transform .2s ease, transform-origin .2s ease;
-  cursor: zoom-out;
-}
-
-  .pill{
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 2;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 900;
-    color: #fff;
-
-    &.ok{ background: #16a34a; }
-    &.warn{ background: #f59e0b; }
-    &.bad{ background: #ef4444; }
   }
 
   .inv-img-counter{
@@ -681,105 +641,45 @@
     -webkit-backdrop-filter: blur(8px);
     pointer-events: none;
   }
-}
 
-.hero-nav{
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 1px solid #e8eef7;
-  background: rgba(255,255,255,0.9);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-
-  &.prev{ left: 10px; }
-  &.next{ right: 10px; }
-
-  .material-icons{
-    color: #0f172a;
-  }
-}
-
-.inv-thumb-strip{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-
-  .thumb{
-    width: 76px;
-    height: 60px;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    overflow: hidden;
-    padding: 0;
-    background: #f8fbff;
-    cursor: pointer;
-    transition: border-color .15s ease, transform .15s ease;
-
-    &.active{
-      border-color: #2563eb;
-      transform: translateY(-2px);
-    }
-
-    img{
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-  }
-}
-
-.inv-zoom-backdrop{
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(6px);
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.inv-zoom-card{
-  position: relative;
-  max-width: min(1200px, 96vw);
-  max-height: min(90vh, 860px);
-  border-radius: 16px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.45);
-
+  /* ✅ full hero -> cover */
   img{
     width: 100%;
     height: 100%;
-    object-fit: contain;
     display: block;
+    object-fit: cover!important;              /* ✅ full size */
+    object-position: center!important;        /* ✅ centriran crop */
   }
-}
 
-.inv-zoom-close{
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid #e8eef7;
-  background: rgba(255,255,255,0.9);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
+  .carousel-control-prev,
+  .carousel-control-next{
+    width: 10%;
+    opacity: .9;
+  }
 
-  .material-icons{
-    font-size: 18px;
-    color: #0f172a;
+  /* (optional) tamni gradient da badge bude čitljiv */
+  &::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,.22) 100%);
+  }
+
+  .pill{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #fff;
+
+    &.ok{ background: #16a34a; }
+    &.warn{ background: #f59e0b; }
+    &.bad{ background: #ef4444; }
   }
 }
 
@@ -978,7 +878,7 @@
   }
 
   .inv-modal-hero{
-    height: 300px; /* mobile full hero */
+    height: 300px; /* ✅ mobile full hero */
   }
 
   .inv-modal-price .value{

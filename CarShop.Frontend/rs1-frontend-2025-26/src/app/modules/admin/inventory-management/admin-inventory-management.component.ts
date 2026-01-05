@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { finalize } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { finalize, map } from 'rxjs/operators';
-import { BehaviorSubject, combineLatest, forkJoin, Subscription } from 'rxjs';
 // paginator uses plain vm object
 
 import { BaseListPagedComponent } from '../../../core/components/base-classes/base-list-paged-component';
@@ -28,7 +28,6 @@ import { StatusLookupDto } from '../../../api-services/statuses/statuses-api.mod
 type VehicleStatus = 'In Stock' | 'Limited' | 'Sold';
 type VehicleCondition = 'New' | 'Used';
 
-
 interface Vehicle {
   id: number;
   make: string;
@@ -41,7 +40,6 @@ interface Vehicle {
   miles: number;
   price: number;
   status: VehicleStatus;
-  categoryName?: string;
 
   imageUrl: string;
   images: string[];
@@ -146,17 +144,7 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
 
   vehicles: Vehicle[] = [];
   filteredVehicles: Vehicle[] = [];
-  private vehicles$ = new BehaviorSubject<Vehicle[]>([]);
-  private filters$ = new BehaviorSubject<{ q: string; make: string; fuel: string; cond: string }>({
-    q: '',
-    make: 'all',
-    fuel: 'all',
-    cond: 'all'
-  });
-  private filtersSub?: Subscription;
-
   page = 1;
-
   pageSize = 10;
   totalCount = 0;
   totalPages = 0;
@@ -165,17 +153,6 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
 
   showViewModal = false;
   selectedVehicle: Vehicle | null = null;
-  activeImageIndex = 0;
-  zoomedImage: string | null = null;
-  zoomScale = 1.8;
-  zoomOrigin = 'center center';
-  lensVisible = false;
-  lensX = 0;
-  lensY = 0;
-  lensSize = 140;
-  lensZoom = 2;
-  lensBgPos = '0% 0%';
-  lensBgImage = '';
 
   private onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && this.showViewModal) this.closeViewModal();
@@ -202,26 +179,11 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
     this.loadLookups();
     this.loadCars();
     window.addEventListener('keydown', this.onKeyDown);
-    this.filtersSub = combineLatest([this.vehicles$, this.filters$])
-  .pipe(
-    map(([items, f]) => {
-      const q = f.q.trim().toLowerCase();
-      return items.filter(v => {
-        const matchesQuery = !q || `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(q);
-        const matchesMake = f.make === 'all' || v.make === f.make;
-        const matchesFuel = f.fuel === 'all' || v.fuelType === f.fuel;
-        const matchesCond = f.cond === 'all' || v.condition === (f.cond as VehicleCondition);
-        return matchesQuery && matchesMake && matchesFuel && matchesCond;
-      });
-    })
-  )
-  .subscribe(list => (this.filteredVehicles = list));
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('keydown', this.onKeyDown);
     document.body.classList.remove('inv-modal-open');
-    this.filtersSub?.unsubscribe();
   }
 
   private loadLookups(): void {
@@ -262,38 +224,52 @@ export class AdminInventoryManagementComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res: any) => {
           const items = Array.isArray(res?.items) ? res.items : [];
-          this.totalCount = Number(res?.totalCount) || items.length;          
+          this.totalCount = Number(res?.totalCount) || items.length;
+          this.pageSize = Number(res?.pageSize) || this.pageSize;
           this.page = Number(res?.page) || this.page;
           this.totalPages = Math.max(1, Math.ceil((this.totalCount || 0) / (this.pageSize || 1)));
           this.vehicles = items.map((x: any) => this.mapListItemToVehicle(x));
-          this.vehicles$.next(this.vehicles);
           this.rebuildFilterOptions();
-          this.emitFilters();
-
+          this.applyFilters();
         },
         error: err => {
           console.error(err);
           this.loadError = 'Failed to load vehicles.';
           this.vehicles = [];
           this.filteredVehicles = [];
-          this.vehicles$.next([]);
           this.rebuildFilterOptions();
         }
       });
   }
 
   applyFilters(): void {
-  this.emitFilters();
-}
+    const q = this.query.trim().toLowerCase();
 
-resetFilters(): void {
-  this.query = '';
-  this.selectedMake = 'all';
-  this.selectedFuelType = 'all';
-  this.selectedCondition = 'all';
-  this.emitFilters();
-}
+    this.filteredVehicles = this.vehicles.filter((v) => {
+      const matchesQuery =
+        !q || `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(q);
 
+      const matchesMake =
+        this.selectedMake === 'all' || v.make === this.selectedMake;
+
+      const matchesFuel =
+        this.selectedFuelType === 'all' || v.fuelType === this.selectedFuelType;
+
+      const matchesCond =
+        this.selectedCondition === 'all' ||
+        v.condition === (this.selectedCondition as VehicleCondition);
+
+      return matchesQuery && matchesMake && matchesFuel && matchesCond;
+    });
+  }
+
+  resetFilters(): void {
+    this.query = '';
+    this.selectedMake = 'all';
+    this.selectedFuelType = 'all';
+    this.selectedCondition = 'all';
+    this.applyFilters();
+  }
 
   goToPage(p: number): void {
     if (p < 1) return;
@@ -312,15 +288,6 @@ resetFilters(): void {
     this.makeOptions = this.unique(this.vehicles.map((x) => x.make).filter(Boolean));
     this.fuelTypeOptions = this.unique(this.vehicles.map((x) => x.fuelType).filter(Boolean));
   }
-  private emitFilters(): void {
-  this.filters$.next({
-    q: this.query,
-    make: this.selectedMake,
-    fuel: this.selectedFuelType,
-    cond: this.selectedCondition,
-  });
-}
-
 
   private unique(arr: string[]): string[] {
     return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b));
@@ -328,7 +295,6 @@ resetFilters(): void {
 
   viewVehicle(v: Vehicle): void {
     this.resetCarouselIndex();
-    this.zoomedImage = null;
     this.showViewModal = true;
     this.isViewLoading = true;
     this.viewError = null;
@@ -339,16 +305,13 @@ resetFilters(): void {
       .subscribe({
         next: dto => {
           const full = this.mapDetailsDtoToVehicle(dto);
-          full.make = (dto as any).brandName ?? v.make ?? '-';
-          if (!full.images?.length && full.imageUrl) {
-            full.images = [full.imageUrl];
-          }
+          full.make = (dto as any).brandName ?? v.make ?? 'Г?"';
           this.selectedVehicle = full;
         },
         error: err => {
           console.error(err);
           this.viewError = 'Failed to load vehicle details';
-          this.selectedVehicle = !v.images?.length && v.imageUrl ? { ...v, images: [v.imageUrl] } : v;
+          this.selectedVehicle = v;
         }
       });
   }
@@ -358,8 +321,6 @@ resetFilters(): void {
     this.selectedVehicle = null;
     this.viewError = null;
     this.isViewLoading = false;
-    this.activeImageIndex = 0;
-    this.zoomedImage = null;
     document.body.classList.remove('inv-modal-open');
   }
 
@@ -422,6 +383,7 @@ resetFilters(): void {
         error: (err: any) => {
           console.error(err);
           this.loadError = 'Failed to delete vehicle.';
+          // ensure UI matches backend if delete failed
           this.loadCars();
         }
       });
@@ -467,6 +429,7 @@ resetFilters(): void {
     this.showAddWizard = true;
     this.wizardStep = 1;
 
+    // Load full details for edit to populate all fields
     this.isLoading = true;
     this.carsApi.getById(v.id)
       .pipe(finalize(() => (this.isLoading = false)))
@@ -479,6 +442,7 @@ resetFilters(): void {
         },
         error: err => {
           console.error(err);
+          // Fallback to minimal fill if details fetch fails
           this.newVehicle = {
             brandId: this.brandOptions[0]?.id ?? 0,
             categoryId: this.categoryOptions[0]?.id ?? 0,
@@ -573,7 +537,6 @@ resetFilters(): void {
         miles: Number(this.newVehicle.miles) || 0,
         price: Number(this.newVehicle.price) || 0,
         status: this.newVehicle.status,
-        
         imageUrl: coverUrl,
         images: coverUrl ? [coverUrl] : [],
         engine: this.newVehicle.engine?.trim(),
@@ -594,6 +557,7 @@ resetFilters(): void {
       return;
     }
 
+    // If files exist, upload first to get URLs; else submit directly
     if (this.newVehicle.images.length > 0) {
       const fd = new FormData();
       this.newVehicle.images.forEach(f => fd.append('Files', f));
@@ -710,6 +674,7 @@ resetFilters(): void {
       galleryImageUrls: this.editingGalleryUrls
     };
 
+    // If new images uploaded for edit, upload first
     if (this.newVehicle.images.length > 0) {
       const fd = new FormData();
       this.newVehicle.images.forEach(f => fd.append('Files', f));
@@ -763,21 +728,16 @@ resetFilters(): void {
     const cover = this.normalizeImageUrl(item?.primaryImageUrl ?? '');
     return {
       id: Number(item?.id) || 0,
-      make: String(item?.make ?? item?.brandName ?? '-'),
-      model: String(item?.model ?? '-'),
+      make: String(item?.make ?? item?.brandName ?? 'Г?"'),
+      model: String(item?.model ?? 'Г?"'),
       year: Number(item?.year ?? item?.productionYear) || new Date().getFullYear(),
       condition: ((item?.condition as VehicleCondition) ?? 'Used'),
-      fuelType: String(item?.fuelType ?? '-'),
-      transmission: String(item?.transmission ?? '-'),
+      fuelType: String(item?.fuelType ?? 'Г?"'),
+      transmission: String(item?.transmission ?? 'Г?"'),
       hp: Number(item?.horsePower) || 0,
       miles: Number(item?.mileage) || 0,
       price: Number(item?.discountedPrice ?? item?.price ?? 0) || 0,
       status: this.mapBackendStatusToUi(item?.carStatusName ?? item?.status),
-      categoryName:
-      item?.categoryName ??
-      item?.category?.name ??
-      item?.category ??
-      (item?.categoryId ? `#${item.categoryId}` : ''),
       imageUrl: cover || '',
       images: cover ? [cover] : [],
       _raw: undefined
@@ -798,21 +758,16 @@ resetFilters(): void {
 
     return {
       id: Number((dto as any).id) || 0,
-      make: (dto as any).brandName ?? (dto as any).make ?? '-',
-      model: (dto as any).model ?? '-',
+      make: (dto as any).brandName ?? (dto as any).make ?? 'Г?"',
+      model: (dto as any).model ?? 'Г?"',
       year: (dto as any).productionYear ?? new Date().getFullYear(),
       condition: ((dto as any).condition as VehicleCondition) ?? 'Used',
-      fuelType: (dto as any).fuelType ?? '-',
-      transmission: (dto as any).transmission ?? '-',
+      fuelType: (dto as any).fuelType ?? 'Г?"',
+      transmission: (dto as any).transmission ?? 'Г?"',
       hp: this.extractNumber((dto as any).horsePower),
       miles: (dto as any).mileage ?? 0,
       price: (dto as any).discountedPrice ?? (dto as any).price ?? 0,
       status: this.mapBackendStatusToUi((dto as any).carStatusName),
-      categoryName:
-      (dto as any).categoryName ??
-      (dto as any).category?.name ??
-      (dto as any).category ??
-      ((dto as any).categoryId ? `#${(dto as any).categoryId}` : ''),
       imageUrl: cover,
       images: uniqueImages,
       engine: (dto as any).engine ?? undefined,
@@ -836,6 +791,7 @@ resetFilters(): void {
     const u = (url ?? '').trim();
     if (!u) return '';
     if (u.startsWith('http://') || u.startsWith('https://')) return u;
+    // backend returns relative (images/cars/...) -> prefix API host
     const path = u.startsWith('/') ? u : `/${u}`;
     return `${environment.apiUrl}${path}`;
   }
@@ -890,7 +846,7 @@ resetFilters(): void {
     };
   }
 
-  
+  activeImageIndex = 0;
 
   onCarouselSlide(ev: any): void {
     const to = Number(ev?.to);
@@ -1071,63 +1027,4 @@ resetFilters(): void {
     this.paginatorVm.totalPages = this.totalPages;
     this.paginatorVm.isLoading = this.isLoading;
   }
-
-  setActiveImage(i: number): void {
-    if (!this.selectedVehicle?.images?.length) return;
-    const max = this.selectedVehicle.images.length - 1;
-    this.activeImageIndex = Math.min(Math.max(i, 0), max);
-  }
-
-  nextImage(): void {
-    if (!this.selectedVehicle?.images?.length) return;
-    this.activeImageIndex = (this.activeImageIndex + 1) % this.selectedVehicle.images.length;
-  }
-
-  prevImage(): void {
-    if (!this.selectedVehicle?.images?.length) return;
-    this.activeImageIndex =
-      (this.activeImageIndex - 1 + this.selectedVehicle.images.length) % this.selectedVehicle.images.length;
-  }
-
-  openZoom(url?: string, ev?: MouseEvent): void {
-  if (!url) return;
-  
-  if (this.zoomedImage === url) {
-    this.closeZoom();
-    return;
-  }
-  if (ev && ev.target instanceof HTMLElement) {
-    const rect = ev.target.getBoundingClientRect();
-    const x = ((ev.clientX - rect.left) / rect.width) * 100;
-    const y = ((ev.clientY - rect.top) / rect.height) * 100;
-    this.zoomOrigin = `${x}% ${y}%`;
-  } else {
-    this.zoomOrigin = 'center center';
-  }
-  this.zoomedImage = url;
-}
-
-closeZoom(): void {
-  this.zoomedImage = null;
-}
-
-onHeroMouseMove(ev: MouseEvent, imgUrl?: string): void {
-  if (!imgUrl) return;
-  const target = ev.target as HTMLElement;
-  const rect = target.getBoundingClientRect();
-  const x = ev.clientX - rect.left;
-  const y = ev.clientY - rect.top;
-  const clampedX = Math.max(0, Math.min(x, rect.width));
-  const clampedY = Math.max(0, Math.min(y, rect.height));
-  this.lensBgImage = imgUrl;
-  this.lensBgPos = `${(clampedX / rect.width) * 100}% ${(clampedY / rect.height) * 100}%`;
-  this.lensX = clampedX - this.lensSize / 2;
-  this.lensY = clampedY - this.lensSize / 2;
-  this.lensVisible = true;
-}
-
-onHeroMouseLeave(): void {
-  this.lensVisible = false;
-}
-
 }

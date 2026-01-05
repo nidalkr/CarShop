@@ -44,7 +44,6 @@ namespace CarShop.Application.Modules.Cars.Queries.GetCars
                 Id = x.Id,
                 Make = x.Brand!.BrandName,
                 Model = x.Model,
-                CategoryName = x.Category.CategoryName,
                 Year = x.ProductionYear,
                 Price = x.Price,
                 DiscountedPrice = x.DiscountedPrice,
